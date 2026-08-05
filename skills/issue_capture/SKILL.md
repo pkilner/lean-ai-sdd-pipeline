@@ -15,7 +15,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 4. Generate `issue.md` using the template below.
 
-5. **Automatically invoke `system_issue_classify {project-name} {issue-id}`** before ending your turn — do not wait for the user to request it. This is an internal orchestration step, not something the user needs to trigger. Present the resulting Category and Complexity to the user alongside the captured issue.
+5. **Automatically invoke `system_issue_classify {project-name} {issue-id}`** before ending your turn — do not wait for the user to request it. This is an internal orchestration step, not something the user needs to trigger. Present the resulting Category to the user alongside the captured issue.
 
 ---
 
@@ -26,7 +26,6 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 > Status: Open
 > Category: Pending classification
-> Complexity: Pending classification
 > Created: {today's date}
 > Project: {project-name}
 > Reported by: {user, if known}
@@ -60,4 +59,4 @@ If known: who/what is affected, and how badly.
 | {today's date} | Open | Captured |
 ```
 
-**Next step:** classification happens automatically as part of this skill. Once you see the Category and Complexity, run `/issue_investigate {project-name} {issue-id}` — unless Complexity is `Simple` and the root cause is already obvious from the description, in which case you may resolve it directly (see `issue_investigate` for the lightweight path).
+**Next step:** classification happens automatically as part of this skill. Once you see the Category, run `/issue_investigate {project-name} {issue-id}`.

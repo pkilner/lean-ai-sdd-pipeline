@@ -59,7 +59,7 @@ The arguments passed to this skill are the project name in kebab-case, optionall
 ### C. Issue Checks (issues referencing this feature, or all issues if project-wide)
 
 1. For each issue under `projects/{project-name}/issues/` (filtered to ones listing this feature in `Related Features / ADRs`, when scoped to a feature):
-   - Confirm `Status: Closed` issues have a `verification.md` (or inline `## Verification`) with `Result: Pass`.
+   - Confirm `Status: Closed` issues have a `verification.md` with `Result: Pass`.
    - Confirm every artifact referenced in the issue (features, ADRs) still exists.
    - Flag any issue stuck in a non-terminal status with no Status History activity — note it for the user's attention (do not guess why).
 

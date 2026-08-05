@@ -1,13 +1,13 @@
 ---
 name: issue_resolve
-description: Resolve an investigated issue — the fourth step in the issue workflow. Applies the recommended corrective action (spec update, code fix, or both) and records what changed. For Simple-complexity issues, records the resolution inline in issue.md instead of a separate file. Pass the project name and issue ID.
+description: Resolve an investigated issue — the fourth step in the issue workflow. Applies the recommended corrective action (spec update, code fix, or both) and records what changed in resolution.md. Pass the project name and issue ID.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID.
 
 ## Steps
 
-1. Read `projects/{project-name}/issues/{issue-id}/investigation.md`, or the inline `## Investigation` section of `issue.md` for Simple-complexity issues (required — do not proceed if missing).
+1. Read `projects/{project-name}/issues/{issue-id}/investigation.md` (required — do not proceed if missing).
 
 2. **Before touching the application repository:**
    - Re-confirm `repo_path` from `project.yaml` resolves to a real git repository (per the checks in `project_init` — do not assume it still holds).
@@ -20,9 +20,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
    - If it requires both, do the spec update first, then the code fix, so the code is brought into line with an already-corrected spec.
    - **Never run `git commit` or `git push` in the application repository as part of this skill.** Leave changes staged/unstaged for the user to review and commit themselves.
 
-4. Check `issue.md`'s `Complexity` field:
-   - **Simple:** append a `## Resolution` section directly to `issue.md` (same content as the template below, inline) instead of creating `resolution.md`.
-   - **Standard (or anything else):** generate a separate `projects/{project-name}/issues/{issue-id}/resolution.md` using the template below.
+4. Generate `projects/{project-name}/issues/{issue-id}/resolution.md` using the template below.
 
 5. List every document and file actually changed, including files in the application repository — this list is both part of the output document and something you state plainly to the user.
 
@@ -32,7 +30,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 ---
 
-## Output Template (`resolution.md`, or the inline `## Resolution` section for Simple issues)
+## Output Template (`resolution.md`)
 
 ```markdown
 # Resolution: {ISSUE-xxxx}

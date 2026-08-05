@@ -1,6 +1,6 @@
 ---
 name: system_issue_classify
-description: (Internal — not for direct user invocation.) Classify a captured issue's category and complexity. Second step in the issue workflow; invoked automatically by issue_capture. Invoked by Claude or other skills only.
+description: (Internal — not for direct user invocation.) Classify a captured issue's category. Second step in the issue workflow; invoked automatically by issue_capture. Invoked by Claude or other skills only.
 user-invocable: false
 ---
 
@@ -23,14 +23,8 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
    If genuinely unclear from the description alone, briefly inspect the relevant feature docs and/or application repository before deciding. If still ambiguous, classify as the closest fit and note the ambiguity in `issue.md`.
 
-3. Assign a **Complexity**:
-   - **Simple** — the fix is small and self-contained: a one-line code change, a typo or single-field correction in a spec doc, no cross-feature or cross-layer impact, and the root cause is already obvious from the description. Simple issues use the lightweight inline path (`issue_investigate`/`issue_resolve`/`issue_verify` write directly into `issue.md` instead of creating separate files).
-   - **Standard** — anything else: root cause isn't obvious yet, spans multiple files/layers/features, or carries real risk if done carelessly.
+3. Update `issue.md`: set `Category` to the chosen value, add a Status History entry.
 
-   When genuinely unsure, default to Standard — the cost of unnecessary rigor on a simple issue is much lower than the cost of under-investigating a real one.
-
-4. Update `issue.md`: set `Category` and `Complexity` to the chosen values, add a Status History entry.
-
-5. Report the classification and reasoning to whichever skill or user turn invoked this.
+4. Report the classification and reasoning to whichever skill or user turn invoked this.
 
 **Next step:** `/issue_investigate {project-name} {issue-id}`.

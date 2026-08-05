@@ -42,12 +42,12 @@ Issues are siblings of features, not nested beneath them.
 
 | Command | Step | Purpose |
 |---|---|---|
-| `/issue_capture <project-name> "<description>"` | 1 | Record what was observed — classification happens automatically as part of this |
-| `/issue_investigate <project-name> <issue-id>` | 2 | Root cause + reconciliation classification |
-| `/issue_resolve <project-name> <issue-id>` | 3 | Apply the fix — never auto-committed or pushed |
-| `/issue_verify <project-name> <issue-id>` | 4 | Confirm the fix, close the issue — automatically runs a consistency review |
+| `/issue_capture <project-name> "<description>"` | 1 | `issue.md` — classification happens automatically as part of this |
+| `/issue_investigate <project-name> <issue-id>` | 2 | `investigation.md` — root cause + reconciliation classification |
+| `/issue_resolve <project-name> <issue-id>` | 3 | `resolution.md` — apply the fix — never auto-committed or pushed |
+| `/issue_verify <project-name> <issue-id>` | 4 | `verification.md` — confirm the fix, close the issue — automatically runs a consistency review |
 
-Simple-complexity issues stay inline in `issue.md`; Standard-complexity issues get separate `investigation.md`/`resolution.md`/`verification.md` files. Decided automatically at capture time.
+Every issue always produces all four files (`issue.md`, `investigation.md`, `resolution.md`, `verification.md`), regardless of size. Classification assigns a category only; it does not change which files get created.
 
 ### Internal orchestration (`system_*`) — never user-facing
 

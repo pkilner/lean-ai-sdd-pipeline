@@ -23,7 +23,7 @@ The argument is the project name in kebab-case. If omitted, list every project u
 
    Never report a feature as Implemented or Verified on the strength of `implementation-plan.md` existing alone — that only means Specified.
 
-3. List every directory under `projects/{project-name}/issues/`. For each, read `issue.md`'s Status, Category, and Complexity.
+3. List every directory under `projects/{project-name}/issues/`. For each, read `issue.md`'s Status and Category.
 
 4. Deliver a concise briefing covering:
    - **What this project is** (one sentence, from `project-brief.md`)

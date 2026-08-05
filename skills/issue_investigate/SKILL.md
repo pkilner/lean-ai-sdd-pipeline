@@ -1,6 +1,6 @@
 ---
 name: issue_investigate
-description: Investigate a classified issue — the third step in the issue workflow. Determines root cause and classifies the code/documentation mismatch using the Reconciliation model. For Simple-complexity issues, records findings inline in issue.md instead of a separate file. Pass the project name and issue ID.
+description: Investigate a classified issue — the third step in the issue workflow. Determines root cause and classifies the code/documentation mismatch using the Reconciliation model, recorded in investigation.md. Pass the project name and issue ID.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID (e.g. `my-app ISSUE-0008`).
@@ -20,9 +20,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
    - **Ambiguous intent** — the spec itself doesn't clearly say what should happen
    - **Scope change** — the requirement itself has changed since the spec was written
 
-5. Check `issue.md`'s `Complexity` field:
-   - **Simple:** append a `## Investigation` section directly to `issue.md` (Root Cause, Reconciliation Classification, Recommended Corrective Action — the same content as the template below, just inline) instead of creating `investigation.md`. Skip straight to whichever of `issue_resolve` handles next.
-   - **Standard (or anything else):** generate a separate `projects/{project-name}/issues/{issue-id}/investigation.md` using the template below.
+5. Generate `projects/{project-name}/issues/{issue-id}/investigation.md` using the template below.
 
 6. Update `issue.md`'s Status History with an "Investigating" or "Investigated" entry.
 
@@ -30,7 +28,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 ---
 
-## Output Template (`investigation.md`, or the inline `## Investigation` section for Simple issues)
+## Output Template (`investigation.md`)
 
 ```markdown
 # Investigation: {ISSUE-xxxx}

@@ -38,10 +38,10 @@ The arguments passed to this skill are the project name in kebab-case, optionall
 
 3. If an issue ID is given, walk the issue workflow in order:
    1. `issue.md` missing → the issue ID doesn't exist; tell the user to check the ID or run `/issue_capture`
-   2. `Category`/`Complexity` still "Pending classification" → classification should have run automatically; if it didn't, something interrupted `issue_capture` — retry it
-   3. No investigation recorded (file or inline) → `/issue_investigate {project-name} {issue-id}`
-   4. No resolution recorded → `/issue_resolve {project-name} {issue-id}`
-   5. No verification recorded → `/issue_verify {project-name} {issue-id}`
+   2. `Category` still "Pending classification" → classification should have run automatically; if it didn't, something interrupted `issue_capture` — retry it
+   3. `investigation.md` missing → `/issue_investigate {project-name} {issue-id}`
+   4. `resolution.md` missing → `/issue_resolve {project-name} {issue-id}`
+   5. `verification.md` missing → `/issue_verify {project-name} {issue-id}`
    6. `issue.md` Status is `Closed` → issue is done; its closing consistency review already ran automatically.
 
 4. Report the recommendation as a single clear next command, with one sentence of why.

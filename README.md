@@ -45,9 +45,9 @@ lean-ai-sdd-pipeline/
         └── issues/
             └── ISSUE-xxxx/
                 ├── issue.md
-                ├── investigation.md    ← Standard-complexity issues only
-                ├── resolution.md       ← Standard-complexity issues only
-                └── verification.md     ← Standard-complexity issues only
+                ├── investigation.md
+                ├── resolution.md
+                └── verification.md
 ```
 
 A project can wrap one application repository. The `projects/` directory supports more than one project if this pipeline repo is used to spec multiple applications.
@@ -94,12 +94,12 @@ The test spec comes **before** the implementation plan — tests define "done", 
 
 | Skill | Step | Produces |
 |---|---|---|
-| `issue_capture` | 1 | `issue.md` — automatically classified (category + complexity) as part of this step |
-| `issue_investigate` | 2 | root cause + Reconciliation classification |
-| `issue_resolve` | 3 | the fix (spec update, code fix, or both — never auto-committed or pushed) |
-| `issue_verify` | 4 | confirmation the fix works, closes the issue — automatically runs a consistency review as part of closing |
+| `issue_capture` | 1 | `issue.md` — automatically classified (category) as part of this step |
+| `issue_investigate` | 2 | `investigation.md` — root cause + Reconciliation classification |
+| `issue_resolve` | 3 | `resolution.md` — the fix (spec update, code fix, or both — never auto-committed or pushed) |
+| `issue_verify` | 4 | `verification.md` — confirmation the fix works, closes the issue — automatically runs a consistency review as part of closing |
 
-Small issues (a typo, a one-line fix with an obvious cause) stay lightweight: investigation/resolution/verification are written as sections appended directly to `issue.md` instead of separate files. Standard-complexity issues get the full four-file trail. This is decided automatically at capture time — you don't have to choose.
+Every issue always produces all four files, regardless of size — `issue.md`, `investigation.md`, `resolution.md`, `verification.md`. Classification assigns a category only; it does not change which files get created.
 
 ### `system_*` — internal orchestration, not user-facing
 
@@ -144,7 +144,7 @@ Any skill that touches the application repository (`issue_resolve`, and implemen
 7. `/feature_test_spec my-app checkout-flow` (writes `UT-1 … Covers AC-1`, etc.) → review → confirm.
 8. `/feature_implementation_plan my-app checkout-flow` (writes tasks, each with a Status and Tests Satisfied) → review → confirm → start implementing.
 9. As tasks are implemented, their Status moves to `Complete`. Once all are `Complete`, a consistency review runs automatically and, if it passes, the feature is **Verified**.
-10. If something's wrong later: `/issue_capture my-app "checkout total is off by tax on international orders"` — classification, and possibly the whole fix, happens automatically for simple cases; otherwise walk `issue_investigate` → `issue_resolve` → `issue_verify`.
+10. If something's wrong later: `/issue_capture my-app "checkout total is off by tax on international orders"` — classification happens automatically; then walk `issue_investigate` → `issue_resolve` → `issue_verify`.
 
 ## Design notes / why it's structured this way
 
@@ -153,7 +153,6 @@ Any skill that touches the application repository (`issue_resolve`, and implemen
 - **Tests come before the implementation plan**, and every test traces to an acceptance criterion. "Done" is defined before a single task is written, not inferred afterward.
 - **Status is tracked, not assumed.** A plan existing doesn't mean anything is built; tasks being marked Complete doesn't mean anything is verified. These are different, explicitly tracked states.
 - **Layer names and paths are not hardcoded.** `project_architecture` derives the project's real system layers and where their code actually lives, once, and every other skill pulls from it.
-- **Issues scale with the problem.** A typo doesn't get a four-document paper trail; a real defect does — decided automatically, not left to guesswork.
 - **Orchestration is invisible where it can be.** Classification and consistency checks happen as part of the workflow, not as extra commands you have to remember to run.
 - **No skills in the application repository.** Keeping all pipeline machinery in one repo means an application repo stays clean of tooling that isn't actually part of the shipped product.
 

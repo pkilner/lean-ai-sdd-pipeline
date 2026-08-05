@@ -1,19 +1,17 @@
 ---
 name: issue_verify
-description: Verify a resolved issue — the fifth and final step in the issue workflow. Confirms the resolution actually fixes the issue, closes it out, and automatically runs a consistency review. For Simple-complexity issues, records verification inline in issue.md instead of a separate file. Pass the project name and issue ID.
+description: Verify a resolved issue — the fifth and final step in the issue workflow. Confirms the resolution actually fixes the issue, records verification.md, closes it out, and automatically runs a consistency review. Pass the project name and issue ID.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID.
 
 ## Steps
 
-1. Read `projects/{project-name}/issues/{issue-id}/resolution.md`, or the inline `## Resolution` section of `issue.md` for Simple-complexity issues (required — do not proceed if missing).
+1. Read `projects/{project-name}/issues/{issue-id}/resolution.md` (required — do not proceed if missing).
 
 2. Execute the Verification Plan from the resolution: run the relevant tests (see the feature's `test-spec.md` if applicable) and/or perform the manual checks it describes.
 
-3. Check `issue.md`'s `Complexity` field:
-   - **Simple:** append a `## Verification` section directly to `issue.md` (same content as the template below, inline) instead of creating `verification.md`.
-   - **Standard (or anything else):** generate a separate `projects/{project-name}/issues/{issue-id}/verification.md` using the template below.
+3. Generate `projects/{project-name}/issues/{issue-id}/verification.md` using the template below.
 
 4. If verification passes, update `issue.md`'s Status to `Closed` and add a Status History entry. If verification fails, update Status back to `Open`, note why in Status History, and tell the user this needs to return to `/issue_investigate` or `/issue_resolve`.
 
@@ -23,7 +21,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 ---
 
-## Output Template (`verification.md`, or the inline `## Verification` section for Simple issues)
+## Output Template (`verification.md`)
 
 ```markdown
 # Verification: {ISSUE-xxxx}

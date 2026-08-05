@@ -1,17 +1,17 @@
 ---
 name: issue_investigate
-description: Investigate a classified issue — the third step in the issue workflow. Determines root cause and classifies the code/documentation mismatch using the Reconciliation model. Pass the project name and issue ID.
+description: Investigate a classified issue — the third step in the issue workflow. Determines root cause and classifies the code/documentation mismatch using the Reconciliation model. For Simple-complexity issues, records findings inline in issue.md instead of a separate file. Pass the project name and issue ID.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID (e.g. `my-app ISSUE-0008`).
 
 ## Steps
 
-1. Read `projects/{project-name}/issues/{issue-id}/issue.md` (required — do not proceed if missing, or if `Category` is still "Pending classification"; tell the user to run `/system_issue_classify` first).
+1. Read `projects/{project-name}/issues/{issue-id}/issue.md` (required — do not proceed if missing, or if `Category` is still "Pending classification"; tell the user to run `/issue_capture` again, or `system_issue_classify` will already have run automatically as part of that).
 
-2. Read any features or ADRs referenced in `Related Features / ADRs`, plus `projects/{project-name}/architecture.md`.
+2. Read any features or ADRs referenced in `Related Features / ADRs`, plus `projects/{project-name}/architecture.md` to locate the relevant layer and repository path.
 
-3. Inspect the application repository (`repo_path` in `projects/{project-name}/project.yaml`) for the relevant implementation.
+3. Inspect the application repository (`repo_path` in `projects/{project-name}/project.yaml`) for the relevant implementation. This step is read-only — do not modify application code here.
 
 4. If code and documentation disagree, do not assume either is correct — classify the mismatch using the Reconciliation model:
    - **Code defect** — implementation does not match agreed spec and documentation is correct
@@ -20,15 +20,17 @@ The arguments passed to this skill are the project name in kebab-case, followed 
    - **Ambiguous intent** — the spec itself doesn't clearly say what should happen
    - **Scope change** — the requirement itself has changed since the spec was written
 
-5. Generate `projects/{project-name}/issues/{issue-id}/investigation.md` using the template below.
+5. Check `issue.md`'s `Complexity` field:
+   - **Simple:** append a `## Investigation` section directly to `issue.md` (Root Cause, Reconciliation Classification, Recommended Corrective Action — the same content as the template below, just inline) instead of creating `investigation.md`. Skip straight to whichever of `issue_resolve` handles next.
+   - **Standard (or anything else):** generate a separate `projects/{project-name}/issues/{issue-id}/investigation.md` using the template below.
 
 6. Update `issue.md`'s Status History with an "Investigating" or "Investigated" entry.
 
-7. After writing the file, present findings and the recommended corrective action to the user.
+7. After writing, present findings and the recommended corrective action to the user.
 
 ---
 
-## Output Template
+## Output Template (`investigation.md`, or the inline `## Investigation` section for Simple issues)
 
 ```markdown
 # Investigation: {ISSUE-xxxx}

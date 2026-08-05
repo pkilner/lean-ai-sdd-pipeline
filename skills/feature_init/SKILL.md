@@ -9,15 +9,17 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 1. Read `projects/{project-name}/project.yaml` (required — do not proceed if the project has not been initialized; tell the user to run `/project_init` first).
 
-2. If `projects/{project-name}/features/{feature-name}/` already exists, stop and tell the user the feature already exists — do not overwrite it.
+2. **Review gate:** check `projects/{project-name}/project-brief.md` and `architecture.md`. Both must exist with `Status: Approved`. If either is missing or still `Draft`, stop here, tell the user which project-level document needs review/approval first, and do not create the feature.
 
-3. Create the directory scaffold:
+3. If `projects/{project-name}/features/{feature-name}/` already exists, stop and tell the user the feature already exists — do not overwrite it.
+
+4. Create the directory scaffold:
 
    ```text
    projects/{project-name}/features/{feature-name}/
    └── adr/
    ```
 
-4. Confirm creation to the user and recommend the next step.
+5. Confirm creation to the user and recommend the next step.
 
 **Next step:** Run `/feature_brief {project-name} {feature-name}`.

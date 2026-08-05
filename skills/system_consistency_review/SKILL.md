@@ -1,61 +1,80 @@
 ---
 name: system_consistency_review
-description: Check consistency of pipeline documents and implementation. Read-only diagnostic — cross-references field names, formulas, and test coverage across a feature's documents and the application code, or across all features in a project. Does not auto-fix. Final step in the issue workflow and usable at any point in the feature workflow.
+description: (Internal — not for direct user invocation.) Read-only diagnostic across project, feature, and issue artifacts — checks project.yaml/architecture/ADR consistency, AC-to-test-to-implementation coverage, documentation and implementation drift, and issue status coherence. Invoked automatically by feature_implementation_plan (on feature completion) and issue_verify (on issue closure), or by Claude when asked to check consistency. Does not auto-fix.
+user-invocable: false
 ---
 
-The arguments passed to this skill are the project name in kebab-case, optionally followed by a feature name in kebab-case. If no feature name is given, run the check across every feature under `projects/{project-name}/features/`.
+**This is a system skill.** It is never invoked directly by a user typing a command — it runs automatically when a feature's implementation plan reaches all-Complete, when an issue is closed, or when Claude decides a consistency check is warranted in response to a plain-language request (e.g. "is this feature actually done?"). Do not present this as something the user should run themselves; if a user wants to check consistency, invoke this skill on their behalf rather than telling them to run it.
+
+The arguments passed to this skill are the project name in kebab-case, optionally followed by a feature name in kebab-case. If no feature name is given, run the Project checks plus the Feature checks for every feature under `projects/{project-name}/features/`.
 
 ## Steps
 
-1. For each feature in scope, read all pipeline documents in `projects/{project-name}/features/{feature-name}/`:
-   - `feature-brief.md` — extract acceptance criteria identifiers (AC-N)
-   - `technical-design.md` — extract: state/field names, formula parameter names, edge case descriptions
-   - `api-spec.md` — extract: data model field names, function/endpoint parameter names, validation rule field names (skip if this feature has no api-spec.md)
-   - `test-spec.md` — extract: test IDs, test input field names, AC references
-   - `implementation-plan.md` — extract: any field names mentioned in task descriptions, and the Test Coverage Map
+### A. Project Checks
 
-2. Locate the implementation file(s) for this feature in the application repository (`repo_path` in `projects/{project-name}/project.yaml`). Use the layer assignments in `implementation-plan.md` together with the application repo's actual folder structure (check `projects/{project-name}/architecture.md` for where each layer's code lives) to find the relevant source files.
+1. Validate `projects/{project-name}/project.yaml` — required fields present, `repo_path` still resolves to a valid git repository not equal to the pipeline repo itself (same checks as `project_init`).
+2. Compare `architecture.md`'s layer list and repository paths against what actually exists in the application repo — flag layers whose declared `Repository path` doesn't exist.
+3. Check every row in `architecture.md`'s Locked Architectural Decisions table has a corresponding ADR in `projects/{project-name}/adr/` with `Status: Accepted`. Flag rows with no ADR, or whose ADR is still `Proposed`.
 
-3. If implementation files exist, extract from them:
-   - State/model field names (from the equivalent of a default-state object, struct, or schema definition)
-   - Function/method parameter names for the logic described in `technical-design.md`
-   - UI label strings or API responses that reference field names
+### B. Feature Checks (per feature in scope)
 
-4. Cross-reference and report the following categories of inconsistency:
+1. Read all pipeline documents in `projects/{project-name}/features/{feature-name}/`:
+   - `feature-brief.md` — extract `AC-N` identifiers
+   - `technical-design.md` — extract: state/field names, formula parameter names, edge case descriptions, `API Specification Required`
+   - `api-spec.md` — extract: data model field names, function/endpoint parameter names, validation rule field names (skip if this feature has no api-spec.md and technical-design.md says it isn't required)
+   - `test-spec.md` — extract: test IDs, `Covers` (AC-N) references, test input field names
+   - `implementation-plan.md` — extract: field names mentioned in task descriptions, task Status values, and the Test Coverage Map
 
-   ### A. Field Name Mismatches
+2. Locate the implementation file(s) for this feature in the application repository, using `architecture.md`'s per-layer `Repository path` fields together with the layer assignments in `implementation-plan.md`.
+
+3. If implementation files exist, extract from them: state/model field names, function/method parameter names for logic described in `technical-design.md`, and UI label strings or API responses that reference field names.
+
+4. Cross-reference and report the following:
+
+   ### B1. Field Name Mismatches
    Fields that appear in one document but not another, or with different names.
 
    | Field | In technical-design | In api-spec | In test-spec | In Implementation |
    |---|---|---|---|---|
-   (Fill in for each field found — ✓ if present, ✗ if missing, ~ if partially/renamed)
+   (✓ present, ✗ missing, ~ partially/renamed)
 
-   ### B. Formula Inconsistencies
-   Formulas in `technical-design.md` that conflict with implementation code.
-   List each formula with the spec version and the implementation version side by side.
+   ### B2. Formula Inconsistencies
+   Formulas in `technical-design.md` that conflict with implementation code — spec version vs. implementation version, side by side.
 
-   ### C. Stale Test Inputs
+   ### B3. Stale Test Inputs
    Test inputs in `test-spec.md` that reference field names not in `api-spec.md`.
-   List each stale reference with the field name used and the correct current name.
 
-   ### D. Missing Test Coverage
-   Acceptance criteria from `feature-brief.md` that are not referenced in `test-spec.md`. Also flag any test ID in `test-spec.md` that does not appear in `implementation-plan.md`'s Test Coverage Map.
-   List each uncovered AC-N identifier and each orphaned test ID.
+   ### B4. Acceptance Criteria Coverage
+   For every `AC-N` in `feature-brief.md`, confirm at least one test in `test-spec.md` has a matching `Covers` reference, and that test ID appears in `implementation-plan.md`'s Test Coverage Map. Flag: ACs with no covering test, tests with a `Covers` reference to an AC that doesn't exist (stale reference), and test IDs missing from the Test Coverage Map.
 
-   ### E. Validation Rule Gaps
+   ### B5. Validation Rule Gaps
    Fields in `api-spec.md` with validation rules that have no corresponding edge case or test in `test-spec.md`.
 
-   ### F. Implementation Drift
-   Fields or functions in the implementation that are not documented in `api-spec.md`.
-   Fields or functions in `api-spec.md` that are not present in the implementation.
+   ### B6. Implementation Drift
+   Fields or functions in the implementation not documented in `api-spec.md`, and vice versa.
 
-5. Produce a summary with a severity rating for each finding:
-   - **Critical** — field name mismatch between api-spec and implementation (will cause runtime errors)
-   - **High** — test inputs reference wrong field names (tests would fail silently)
-   - **Medium** — formula in technical-design contradicts implementation
-   - **Low** — documentation gap (missing coverage, no runtime impact)
+   ### B7. Status Integrity
+   Any task marked `Complete` in `implementation-plan.md` whose Tests Satisfied are not actually present/passing in the application repo. A task should never be `Complete` without its tests existing.
 
-6. End with a **Consistency Score**: X/Y checks passing, where Y is the total number of checks performed. If run across multiple features, report one score per feature plus an overall total.
+### C. Issue Checks (issues referencing this feature, or all issues if project-wide)
+
+1. For each issue under `projects/{project-name}/issues/` (filtered to ones listing this feature in `Related Features / ADRs`, when scoped to a feature):
+   - Confirm `Status: Closed` issues have a `verification.md` (or inline `## Verification`) with `Result: Pass`.
+   - Confirm every artifact referenced in the issue (features, ADRs) still exists.
+   - Flag any issue stuck in a non-terminal status with no Status History activity — note it for the user's attention (do not guess why).
+
+### D. Severity and Verdict
+
+Rate each finding:
+- **Critical** — field name mismatch between api-spec and implementation, or a Complete task with missing tests (will cause runtime errors or false confidence)
+- **High** — test inputs reference wrong field names, or an AC has no covering test (tests would fail silently or done-ness is unverifiable)
+- **Medium** — formula in technical-design contradicts implementation, or a Locked decision lacks an Accepted ADR
+- **Low** — documentation gap, no runtime impact
+
+Produce a single verdict, not a numeric score:
+- **FAIL** — at least one Critical finding
+- **PASS WITH WARNINGS** — no Critical findings, but at least one High/Medium/Low finding
+- **PASS** — no findings at all
 
 ## Output Format
 
@@ -68,44 +87,33 @@ The arguments passed to this skill are the project name in kebab-case, optionall
 > Documents checked: {list of docs found}
 > Implementation checked: {path(s) or "not found"}
 
+## Verdict: PASS / PASS WITH WARNINGS / FAIL
+
 ## Summary
 
-{N} issues found across {M} checks.
+{N} findings ({X} Critical, {Y} High, {Z} Medium, {W} Low).
 
-| Severity | Count |
-|---|---|
-| Critical | N |
-| High | N |
-| Medium | N |
-| Low | N |
+## A. Project Checks
 
-## A. Field Name Mismatches
+{findings or "No issues found"}
 
-{table or "No mismatches found"}
+## B. Feature Checks
 
-## B. Formula Inconsistencies
+### B1. Field Name Mismatches
+### B2. Formula Inconsistencies
+### B3. Stale Test Inputs
+### B4. Acceptance Criteria Coverage
+### B5. Validation Rule Gaps
+### B6. Implementation Drift
+### B7. Status Integrity
 
-{findings or "No inconsistencies found"}
+(each: table/findings, or "No issues found")
 
-## C. Stale Test Inputs
+## C. Issue Checks
 
-{findings or "No stale references found"}
-
-## D. Missing Test Coverage
-
-{findings or "All acceptance criteria covered"}
-
-## E. Validation Rule Gaps
-
-{findings or "All validation rules have test coverage"}
-
-## F. Implementation Drift
-
-{findings or "Implementation matches specification"}
+{findings or "No issues found"}
 
 ---
-
-## Consistency Score: {X}/{Y} checks passing
 
 ### Recommended Actions (in priority order)
 
@@ -113,17 +121,16 @@ The arguments passed to this skill are the project name in kebab-case, optionall
 2. {High priority fix}
 ...
 
-If no issues: "All checks pass. Documents are consistent with implementation."
+If PASS: "All checks pass. Documents are consistent with implementation."
 ```
 
 ## Notes
 
-- This skill is **read-only**. It reports gaps but does not modify any files.
-- If the implementation does not exist yet, skip Section F and note that implementation has not started.
-- When comparing field names, treat naming-convention variations as distinct (e.g. `samplingInterval` ≠ `sampling_interval`) unless the project has an established, documented convention for translating between them (e.g. camelCase in code vs snake_case in a database).
+- This skill is **read-only**. It reports gaps and recommendations but does not modify any files.
+- If the implementation does not exist yet, skip B6/B7 and note that implementation has not started.
+- When comparing field names, treat naming-convention variations as distinct (e.g. `samplingInterval` ≠ `sampling_interval`) unless the project has an established, documented convention for translating between them.
 - If a document is missing (e.g. `implementation-plan.md` was not generated), note it but continue with the remaining documents.
-- If any finding traces back to a genuine defect, unapproved change, or ambiguous intent rather than simple drift, recommend `/issue_capture {project-name} "..."` to track it formally rather than fixing it silently.
-- After reporting, suggest running `/system_consistency_review {project-name} {feature-name}` again after fixes to confirm resolution.
+- If any finding traces back to a genuine defect, unapproved change, or ambiguous intent rather than simple drift, recommend capturing it as a new issue (`issue_capture`) rather than fixing it silently here.
 
 ## Change Propagation Reminder
 

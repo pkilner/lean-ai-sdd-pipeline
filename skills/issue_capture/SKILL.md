@@ -1,6 +1,6 @@
 ---
 name: issue_capture
-description: Capture a new issue — the first step in the issue workflow. Creates projects/{project-name}/issues/ISSUE-xxxx/ with an issue.md describing what was observed. Issues are siblings of features, not nested beneath them.
+description: Capture a new issue — the first step in the issue workflow. Creates projects/{project-name}/issues/ISSUE-xxxx/ with an issue.md describing what was observed, then automatically classifies it. Issues are siblings of features, not nested beneath them.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by a short free-text description of what was observed (e.g. `my-app "sync fails silently when offline for more than 24h"`).
@@ -15,7 +15,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 4. Generate `issue.md` using the template below.
 
-5. After writing the file, confirm the issue ID to the user and recommend the next step.
+5. **Automatically invoke `system_issue_classify {project-name} {issue-id}`** before ending your turn — do not wait for the user to request it. This is an internal orchestration step, not something the user needs to trigger. Present the resulting Category and Complexity to the user alongside the captured issue.
 
 ---
 
@@ -26,6 +26,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 > Status: Open
 > Category: Pending classification
+> Complexity: Pending classification
 > Created: {today's date}
 > Project: {project-name}
 > Reported by: {user, if known}
@@ -59,4 +60,4 @@ If known: who/what is affected, and how badly.
 | {today's date} | Open | Captured |
 ```
 
-**Next step:** Run `/system_issue_classify {project-name} {issue-id}`.
+**Next step:** classification happens automatically as part of this skill. Once you see the Category and Complexity, run `/issue_investigate {project-name} {issue-id}` — unless Complexity is `Simple` and the root cause is already obvious from the description, in which case you may resolve it directly (see `issue_investigate` for the lightweight path).

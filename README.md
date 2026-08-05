@@ -16,7 +16,7 @@ workspace/
 └── <application-repository>/ ← source code, tests, deployment, configuration
 ```
 
-The pipeline repository owns specifications, architecture, ADRs, workflow, and issue tracking. The application repository owns only source code, tests, deployment, and configuration. **No Claude skills are copied into the application repository** — run Claude Code from this pipeline repo (or a workspace root that contains both as siblings), and skills reach into the application repo via each project's `repo_path`.
+The pipeline repository owns specifications, architecture, ADRs, workflow, and issue tracking. The application repository owns only source code, tests, deployment, and configuration. **No Claude skills are copied into the application repository** — run Claude Code from this pipeline repo (or a workspace root that contains both as siblings), and skills reach into the application repo via each project's validated `repo_path`.
 
 ## Repository layout
 
@@ -45,72 +45,75 @@ lean-ai-sdd-pipeline/
         └── issues/
             └── ISSUE-xxxx/
                 ├── issue.md
-                ├── investigation.md
-                ├── resolution.md
-                └── verification.md
+                ├── investigation.md    ← Standard-complexity issues only
+                ├── resolution.md       ← Standard-complexity issues only
+                └── verification.md     ← Standard-complexity issues only
 ```
 
 A project can wrap one application repository. The `projects/` directory supports more than one project if this pipeline repo is used to spec multiple applications.
 
+## Review gates: Draft → Approved
+
+Every generated document (`project-brief.md`, `architecture.md`, `feature-brief.md`, `technical-design.md`, `api-spec.md`, `test-spec.md`, `implementation-plan.md`) starts `Status: Draft`. The skill that owns the *next* step in the workflow checks this field before doing anything — if the prerequisite is still `Draft`, it stops, names the document that needs review, and does not proceed. It never approves a document on your behalf; approval only happens when you confirm the review checklist, at which point the status flips to `Approved` in that same document.
+
+This is a single field, not an approval engine — but it means the pipeline cannot silently race ahead of what's actually been reviewed.
+
+ADRs use their own vocabulary instead: `Proposed` when created, `Accepted` only once a human has actually reviewed and confirmed the decision.
+
 ## Skill namespaces
 
-Every skill lives in exactly one of four namespaces.
+### `project_*` and `feature_*` and `issue_*` — user-facing
 
-### `project_*` — project lifecycle (user-facing)
+These are the skills you run directly.
 
-| Skill | Step | Produces | Purpose |
-|---|---|---|---|
-| `project_init` | 1 | `project.yaml` + scaffold | Register a project and point it at its application repo |
-| `project_brief` | 2 | `project-brief.md` | What the project is, who it's for, what success looks like |
-| `project_architecture` | 3 | `architecture.md` | System layers, key technical decisions, data stores |
-| `project_adr` | as needed | `adr/adr_NNN_*.md` | Record a project-wide architectural decision |
+**Project lifecycle** — run once per project:
 
-### `feature_*` — feature lifecycle (user-facing)
+| Skill | Step | Produces |
+|---|---|---|
+| `project_init` | 1 | `project.yaml` (validates `repo_path` — must exist, be a git repo, and not be this pipeline repo itself) |
+| `project_brief` | 2 | `project-brief.md` |
+| `project_architecture` | 3 | `architecture.md` (per-layer repository path, responsibility, status) |
+| `project_adr` | as needed | `adr/adr_NNN_*.md` |
 
-Run in order for each feature. Each step ends with a human review checkpoint — nothing proceeds automatically.
+**Feature lifecycle** — run in order for each feature, each step gated on the previous being `Approved`:
 
-| Skill | Step | Produces | Purpose |
-|---|---|---|---|
-| `feature_init` | 1 | scaffold | Create the feature's directory |
-| `feature_brief` | 2 | `feature-brief.md` | What to build — user stories, acceptance criteria, scope |
-| `feature_technical_design` | 3 | `technical-design.md` | How to build it — design per system layer, data flow |
-| `feature_api_spec` | 4 (if needed) | `api-spec.md` | Exact contracts — data models, DB schema, endpoints, events |
-| `feature_test_spec` | 5 | `test-spec.md` | Unit, integration, and end-to-end tests — **defines "done"** |
-| `feature_implementation_plan` | 6 | `implementation-plan.md` | Coding tasks in dependency order, each mapped to the tests it satisfies |
-| `feature_adr` | as needed | `adr/adr_NNN_*.md` | Record a feature-level architectural decision |
-| — | 7 | (code) | Implementation, in the application repository |
+| Skill | Step | Produces |
+|---|---|---|
+| `feature_init` | 1 | scaffold |
+| `feature_brief` | 2 | `feature-brief.md` (stable `AC-N` acceptance criteria) |
+| `feature_technical_design` | 3 | `technical-design.md` (declares whether an API spec is required) |
+| `feature_api_spec` | 4, only if required | `api-spec.md` |
+| `feature_test_spec` | 5 | `test-spec.md` — every test maps to the `AC-N` it validates; Unit/Integration/E2E each marked Required/Optional/Not Applicable |
+| `feature_implementation_plan` | 6 | `implementation-plan.md` — every task tracks real Status (Not Started/In Progress/Blocked/Complete) and the test IDs it satisfies |
+| `feature_adr` | as needed | `adr/adr_NNN_*.md` |
+| — | 7 | implementation, in the application repository |
 
-The test spec comes **before** the implementation plan. Tests define what "done" means; the implementation plan exists to satisfy them, not the other way around. Every implementation task references the test IDs it satisfies.
+The test spec comes **before** the implementation plan — tests define "done", the plan exists to satisfy them. A feature is only **Implemented** once every task's Status is `Complete`; it's only **Verified** once a consistency review has actually passed. Neither is true just because `implementation-plan.md` exists.
 
-### `issue_*` — issue lifecycle (user-facing)
+**Issue lifecycle** — issues are siblings of features, not nested beneath them, since one issue can span several:
 
-Issues are **siblings of features**, not nested beneath them — an issue can span multiple features.
+| Skill | Step | Produces |
+|---|---|---|
+| `issue_capture` | 1 | `issue.md` — automatically classified (category + complexity) as part of this step |
+| `issue_investigate` | 2 | root cause + Reconciliation classification |
+| `issue_resolve` | 3 | the fix (spec update, code fix, or both — never auto-committed or pushed) |
+| `issue_verify` | 4 | confirmation the fix works, closes the issue — automatically runs a consistency review as part of closing |
 
-| Skill | Step | Produces | Purpose |
-|---|---|---|---|
-| `issue_capture` | 1 | `issue.md` | Record what was observed |
-| `system_issue_classify` | 2 | updates `issue.md` | Assign a category (see below) |
-| `issue_investigate` | 3 | `investigation.md` | Root cause + reconciliation classification |
-| `issue_resolve` | 4 | `resolution.md` | Apply the fix (spec, code, or both) |
-| `issue_verify` | 5 | `verification.md` | Confirm the fix actually works, close the issue |
-| `system_consistency_review` | 6 | report only | Confirm no residual drift was introduced |
+Small issues (a typo, a one-line fix with an obvious cause) stay lightweight: investigation/resolution/verification are written as sections appended directly to `issue.md` instead of separate files. Standard-complexity issues get the full four-file trail. This is decided automatically at capture time — you don't have to choose.
 
-Issue categories: Defect, Documentation drift, Design defect, Implementation drift, Test gap, Change request, Dependency/environment issue.
+### `system_*` — internal orchestration, not user-facing
 
-### `system_*` — governance and orchestration (not user-facing)
+These are invoked automatically by the skills above, or by Claude directly when it needs to check state — never by you typing a command. You will see their output (a classification, a consistency report, a briefing), but you don't invoke them:
 
-Invoked by Claude or by other skills, though nothing stops you from running one directly.
+- `system_issue_classify` — runs inside `issue_capture`
+- `system_consistency_review` — runs inside `feature_implementation_plan` (once all tasks are Complete) and `issue_verify` (once an issue closes), or whenever you ask Claude to check whether something is actually consistent
+- `system_next_step` / `system_workflow_resume` — Claude runs these itself at the start of a session, or whenever you ask "where were we" / "what's next" in plain language
 
-| Skill | Purpose |
-|---|---|
-| `system_issue_classify` | Assign an issue's category |
-| `system_consistency_review` | Read-only cross-check of a feature's (or a whole project's) docs against the implementation |
-| `system_next_step` | Inspect existing artifacts and report the next command to run |
-| `system_workflow_resume` | Full briefing on a project's state — what exists, what's in progress, what's next |
+If you want a consistency check or a status briefing, just ask — Claude runs the relevant system skill for you.
 
 ## Reconciliation
 
-When code and documentation disagree, never assume one is correct by default. Classify the mismatch first:
+When code and documentation disagree, never assume one is correct by default. `issue_investigate` classifies the mismatch first:
 
 - Code defect
 - Documentation drift
@@ -118,25 +121,41 @@ When code and documentation disagree, never assume one is correct by default. Cl
 - Ambiguous intent
 - Scope change
 
-Then recommend the corrective action. Documents are not automatically rewritten to match code — `issue_investigate` performs this classification as part of the issue workflow.
+Then recommends the corrective action. Documents are not automatically rewritten to match code.
+
+## Operational safety
+
+Any skill that touches the application repository (`issue_resolve`, and implementation itself):
+
+- Re-validates `repo_path` before editing anything
+- Checks `git status` first and does not edit over unrelated uncommitted work without confirming with you
+- Touches only the files required for the task at hand — no opportunistic refactors
+- Never runs `git commit` or `git push` on your behalf
+- Reports exactly which files it changed
 
 ## Getting started
 
-1. Point Claude Code at a workspace root that contains this repo and your application repo as siblings (or run it from inside this repo, if the application repo's absolute/relative path is reachable).
-2. `/project_init <project-name> <repo-path-to-application-repo>`
-3. `/project_brief <project-name>` → `/project_architecture <project-name>`
-4. `/feature_init <project-name> <feature-name>` → walk the `feature_*` pipeline in order.
-5. When something goes wrong: `/issue_capture <project-name> "<description>"` → walk the `issue_*` pipeline in order.
-6. Anytime: `/system_workflow_resume <project-name>` to get re-oriented, or `/system_next_step <project-name> [feature-name|issue-id]` for a single next command.
+1. Point Claude Code at a workspace root that contains this repo and your application repo as siblings (or run it from inside this repo, if the application repo's path is reachable).
+2. `/project_init my-app ../my-app` → validates the repo, creates `projects/my-app/project.yaml`.
+3. `/project_brief my-app` → review the draft → confirm → `/project_architecture my-app` → review → confirm.
+4. `/feature_init my-app checkout-flow` → `/feature_brief my-app checkout-flow` (writes `AC-1`, `AC-2`, ...) → review → confirm.
+5. `/feature_technical_design my-app checkout-flow` (declares `API Specification Required: Yes`) → review → confirm.
+6. `/feature_api_spec my-app checkout-flow` → review → confirm.
+7. `/feature_test_spec my-app checkout-flow` (writes `UT-1 … Covers AC-1`, etc.) → review → confirm.
+8. `/feature_implementation_plan my-app checkout-flow` (writes tasks, each with a Status and Tests Satisfied) → review → confirm → start implementing.
+9. As tasks are implemented, their Status moves to `Complete`. Once all are `Complete`, a consistency review runs automatically and, if it passes, the feature is **Verified**.
+10. If something's wrong later: `/issue_capture my-app "checkout total is off by tax on international orders"` — classification, and possibly the whole fix, happens automatically for simple cases; otherwise walk `issue_investigate` → `issue_resolve` → `issue_verify`.
 
 ## Design notes / why it's structured this way
 
-- **One document, one review gate, per step.** Each `feature_*` and `project_*` skill refuses to proceed if its required upstream document is missing — this keeps work from drifting ahead of what's actually been agreed.
-- **Change propagation is top-down.** `feature-brief → technical-design → api-spec → test-spec → implementation-plan → implementation`. If a change originates in the implementation (e.g. a bug discovery), update upward first, then confirm downward. `system_consistency_review` exists specifically to catch when this discipline slips.
-- **Tests come before the implementation plan.** This flips the historical order in this pipeline on purpose: tests are the definition of "done", not an afterthought validated against whatever got built.
-- **Layer names are not hardcoded.** `project_architecture` derives the project's real system layers (Frontend/Backend/Database, On-Device/Cloud, or whatever fits) once, and every other skill pulls from it — no skill assumes a specific stack.
-- **Issues are first-class, not an afterthought bolted onto features.** They live as siblings of features because a single issue can span several of them, and because "something is wrong" is a fundamentally different workflow from "build something new."
-- **No skills in the application repository.** Keeping all pipeline machinery in one repo means an application repo stays clean of tooling that isn't actually part of the shipped product, and one pipeline repo can spec more than one application if needed.
+- **One document, one review gate, per step.** No skill can silently build on top of something nobody has actually reviewed.
+- **Change propagation is top-down.** `feature-brief → technical-design → api-spec → test-spec → implementation-plan → implementation`. If a change originates in the implementation (e.g. a bug discovery), update upward first, then confirm downward.
+- **Tests come before the implementation plan**, and every test traces to an acceptance criterion. "Done" is defined before a single task is written, not inferred afterward.
+- **Status is tracked, not assumed.** A plan existing doesn't mean anything is built; tasks being marked Complete doesn't mean anything is verified. These are different, explicitly tracked states.
+- **Layer names and paths are not hardcoded.** `project_architecture` derives the project's real system layers and where their code actually lives, once, and every other skill pulls from it.
+- **Issues scale with the problem.** A typo doesn't get a four-document paper trail; a real defect does — decided automatically, not left to guesswork.
+- **Orchestration is invisible where it can be.** Classification and consistency checks happen as part of the workflow, not as extra commands you have to remember to run.
+- **No skills in the application repository.** Keeping all pipeline machinery in one repo means an application repo stays clean of tooling that isn't actually part of the shipped product.
 
 ## License
 

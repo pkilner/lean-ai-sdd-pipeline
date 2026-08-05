@@ -1,22 +1,34 @@
 ---
 name: system_workflow_resume
-description: Onboard to the current state of a project and deliver a briefing covering what exists, what is in progress, open issues, and what to do next. Run at the start of a session, or whenever picking work back up after a break.
+description: (Internal — not for direct user invocation.) Onboard to the current state of a project and deliver a briefing covering what exists, what is in progress, open issues, and what to do next — using Project Initialized / Project Defined / Feature Specified / Feature In Progress / Feature Implemented / Feature Verified state labels. Invoked automatically by Claude at the start of a session (see CLAUDE.md), or whenever the user asks to be re-oriented.
+user-invocable: false
 ---
 
-The argument passed to this skill is the project name in kebab-case. If omitted, list every project under `projects/` with a one-line status for each instead of a full briefing.
+**This is a system skill.** Claude invokes it on its own at the start of a session per this repo's `CLAUDE.md`, or whenever the user asks something like "where were we" or "what's the state of this project" — it is not a command the user is expected to type themselves.
+
+The argument is the project name in kebab-case. If omitted, list every project under `projects/` with a one-line status for each instead of a full briefing.
 
 ## Steps
 
-1. Read `projects/{project-name}/project.yaml`, `project-brief.md`, and `architecture.md` (skip any that don't exist yet — report their absence instead of failing).
+1. Read `projects/{project-name}/project.yaml`, `project-brief.md`, and `architecture.md` (skip any that don't exist yet — report their absence instead of failing). Determine project state:
+   - **Project Initialized** — `project.yaml` exists; `project-brief.md` and/or `architecture.md` missing or still `Draft`.
+   - **Project Defined** — both `project-brief.md` and `architecture.md` exist with `Status: Approved`.
 
-2. List every directory under `projects/{project-name}/features/`. For each, check which of `feature-brief.md`, `technical-design.md`, `api-spec.md`, `test-spec.md`, `implementation-plan.md` exist to determine how far along it is.
+2. List every directory under `projects/{project-name}/features/`. For each, determine state by walking the same logic as `system_next_step`:
+   - **(in definition)** — one or more of feature-brief/technical-design/api-spec/test-spec/implementation-plan missing or still `Draft`. Report which document is the blocker.
+   - **Feature Specified** — all required documents `Approved`, all implementation tasks `Not Started`.
+   - **Feature In Progress** — some tasks `In Progress` or `Complete`, not all `Complete`.
+   - **Feature Implemented** — all tasks `Complete`, but `Verified: Not yet`.
+   - **Feature Verified** — all tasks `Complete` and `Verified` is set (consistency review passed).
 
-3. List every directory under `projects/{project-name}/issues/`. For each, read `issue.md`'s Status and Category.
+   Never report a feature as Implemented or Verified on the strength of `implementation-plan.md` existing alone — that only means Specified.
+
+3. List every directory under `projects/{project-name}/issues/`. For each, read `issue.md`'s Status, Category, and Complexity.
 
 4. Deliver a concise briefing covering:
    - **What this project is** (one sentence, from `project-brief.md`)
-   - **What has been built** — features with a complete `implementation-plan.md`
-   - **What is currently in progress** — features with partial documents, and open (non-`Closed`) issues
+   - **What has been built** — features at Implemented or Verified
+   - **What is currently in progress** — features In Progress or still in definition, and open (non-`Closed`) issues
    - **Open decisions** — from `architecture.md`'s Open Decisions table
    - **Recommended next action** — invoke the logic in `system_next_step` for the most relevant in-progress feature or issue, or for the project itself if nothing is in progress
 

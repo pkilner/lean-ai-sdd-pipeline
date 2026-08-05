@@ -1,6 +1,6 @@
 ---
 name: feature_brief
-description: Generate a Feature Brief — the second step in the feature workflow. Defines what is being built, why, for whom, and what done looks like.
+description: Generate a Feature Brief — the second step in the feature workflow. Defines what is being built, why, for whom, and what done looks like, with stable AC-N acceptance criteria identifiers.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by the feature name in kebab-case.
@@ -12,9 +12,16 @@ The arguments passed to this skill are the project name in kebab-case, followed 
    - `projects/{project-name}/architecture.md` (if it exists)
    - Any existing `projects/{project-name}/features/{feature-name}/feature-brief.md` (in case this is a revision)
 
-2. Generate `projects/{project-name}/features/{feature-name}/feature-brief.md` using the template below.
+2. Generate `projects/{project-name}/features/{feature-name}/feature-brief.md` using the template below. It always starts `Status: Draft`.
 
-3. After writing the file, present the Review Checklist to the user.
+3. Give every acceptance criterion a stable identifier: `AC-1`, `AC-2`, `AC-3`, etc. These identifiers are permanent once `technical-design.md`, `test-spec.md`, or any other downstream document references them — **never renumber an existing AC**, even across revisions. If revising a brief that already has downstream artifacts:
+   - Editing the wording of an existing AC in place is fine.
+   - A genuinely new criterion gets the next unused number (highest existing AC number + 1), even if a lower number was previously retired.
+   - A criterion that no longer applies is marked `Retired` in place, not deleted and not renumbered — downstream references to it stay resolvable.
+
+4. After writing the file, present the Review Checklist to the user.
+
+5. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Until this document is Approved, `feature_technical_design` will refuse to proceed.
 
 ---
 
@@ -43,10 +50,10 @@ What user need or system gap does this feature address? Why does it need to exis
 
 ## Acceptance Criteria
 
-A numbered list of specific, testable conditions that must be true for this feature to be considered complete.
+Each criterion gets a permanent identifier. Do not renumber once assigned.
 
-1. ...
-2. ...
+- **AC-1:** ...
+- **AC-2:** ...
 
 ## Scope
 
@@ -84,7 +91,7 @@ Before running the next skill, confirm:
 
 - [ ] The problem statement accurately reflects the intent
 - [ ] User stories cover the main use cases
-- [ ] Acceptance criteria are specific and testable
+- [ ] Every acceptance criterion has a stable AC-N identifier and is specific and testable
 - [ ] Scope boundaries are clear
 - [ ] Applicability is correct (or explicitly omitted)
 - [ ] Open questions are noted

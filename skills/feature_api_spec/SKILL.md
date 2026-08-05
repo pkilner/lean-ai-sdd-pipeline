@@ -1,11 +1,9 @@
 ---
 name: feature_api_spec
-description: Generate an API & Schema Spec — the fourth step in the feature workflow, only needed when the feature introduces or changes contracts. Defines exact contracts including API endpoints, request/response shapes, database schemas, event schemas, and validation rules.
+description: Generate an API & Schema Spec — the fourth step in the feature workflow, run only when technical-design.md declares "API Specification Required: Yes". Defines exact contracts including API endpoints, request/response shapes, database schemas, event schemas, and validation rules.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by the feature name in kebab-case.
-
-Skip this skill entirely for features with no new or changed contracts (e.g. a pure UI rearrangement) — go straight from `feature_technical_design` to `feature_test_spec`.
 
 ## Steps
 
@@ -14,9 +12,15 @@ Skip this skill entirely for features with no new or changed contracts (e.g. a p
    - `projects/{project-name}/features/{feature-name}/technical-design.md` (required — do not proceed if missing)
    - `projects/{project-name}/architecture.md` (if it exists)
 
-2. Generate `projects/{project-name}/features/{feature-name}/api-spec.md` using the template below.
+2. **Review gate:** check `technical-design.md`'s Status. If `Draft`, stop here and tell the user it needs review and approval first. If the user confirms approval in response, update its Status to `Approved`, then continue.
 
-3. After writing the file, present the Review Checklist to the user.
+3. Check `technical-design.md`'s `API Specification Required` field. If it says `No`, stop and tell the user this skill isn't needed for this feature — go straight to `/feature_test_spec {project-name} {feature-name}`.
+
+4. Generate `projects/{project-name}/features/{feature-name}/api-spec.md` using the template below.
+
+5. After writing the file, present the Review Checklist to the user.
+
+6. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Until this document is Approved (when required), `feature_test_spec` will refuse to proceed.
 
 ---
 

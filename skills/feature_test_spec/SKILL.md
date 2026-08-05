@@ -1,6 +1,6 @@
 ---
 name: feature_test_spec
-description: Generate a Test Spec — the fifth step in the feature workflow, run before the Implementation Plan. Defines unit, integration, and end-to-end tests, edge cases, performance scenarios, and pass/fail criteria. Tests define "done" — the implementation plan is built to satisfy these tests, not the other way around.
+description: Generate a Test Spec — the fifth step in the feature workflow, run before the Implementation Plan. Defines unit, integration, and end-to-end tests (each marked Required/Optional/Not Applicable), maps every test to the acceptance criteria it validates, and sets pass/fail criteria. Tests define "done" — the implementation plan is built to satisfy these tests, not the other way around.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by the feature name in kebab-case.
@@ -8,22 +8,28 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 ## Steps
 
 1. Read the following for context:
-   - `projects/{project-name}/features/{feature-name}/feature-brief.md` (required)
+   - `projects/{project-name}/features/{feature-name}/feature-brief.md` (required — this is where AC-N identifiers come from)
    - `projects/{project-name}/features/{feature-name}/technical-design.md` (required)
-   - `projects/{project-name}/features/{feature-name}/api-spec.md` (if it exists — skipped for features with no new contracts)
+   - `projects/{project-name}/features/{feature-name}/api-spec.md` (required only if technical-design.md's `API Specification Required` is `Yes`)
 
-2. Generate `projects/{project-name}/features/{feature-name}/test-spec.md` using the template below.
+2. **Review gate:** confirm `technical-design.md` has `Status: Approved`, and `api-spec.md` too if it is required for this feature. If either is still `Draft`, stop here and tell the user which document needs review/approval first. If the user confirms approval in response, update that document's Status to `Approved`, then continue.
 
-3. Give every test a stable ID (`UT-N` for unit, `IT-N` for integration, `E2E-N` for end-to-end, `EC-N` for edge case, `PT-N` for performance). `feature_implementation_plan` references these IDs directly — do not renumber tests once `implementation-plan.md` exists without also updating it.
+3. Generate `projects/{project-name}/features/{feature-name}/test-spec.md` using the template below.
 
-4. Tests must cover all three levels: unit, integration, and end-to-end. Do not skip a level unless it genuinely does not apply — explain why if so.
+4. Give every test a stable ID (`UT-N` for unit, `IT-N` for integration, `E2E-N` for end-to-end, `EC-N` for edge case, `PT-N` for performance). `feature_implementation_plan` references these IDs directly — do not renumber tests once `implementation-plan.md` exists without also updating it.
 
-5. Every test spec **must** include a "Test Suite Metadata" section (see template) that defines:
+5. Every test must state which acceptance criterion (or criteria) it validates, using the `AC-N` identifiers from `feature-brief.md`, in a **Covers** column/field. A test with no functional AC to validate (e.g. a pure performance benchmark) may use `—`, but this should be the exception, not the default — most tests should trace back to an AC.
+
+6. For each of the three test levels (Unit, Integration, End-to-End), explicitly mark it `Required`, `Optional`, or `Not Applicable` in the Test Suite Metadata section, with a one-line reason for anything not `Required`. A small utility feature may legitimately mark Integration and/or End-to-End as `Not Applicable` — do not force coverage that doesn't fit the feature's shape. Unit is `Required` unless the feature genuinely has no non-trivial logic.
+
+7. Every test spec **must** include a "Test Suite Metadata" section (see template) that defines:
    - The named test suites and which tier each belongs to (see the tier model below)
    - The command(s) used to run each suite in the application repository — check `projects/{project-name}/project.yaml` for `repo_path`, then that repository's own docs, or ask the user if it doesn't document a test runner yet
    - Whether the runner produces machine-readable (JSON/XML) and/or human-readable output, and where reports land
 
-6. After writing the file, present the Review Checklist to the user.
+8. After writing the file, present the Review Checklist to the user.
+
+9. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Until this document is Approved, `feature_implementation_plan` will refuse to proceed.
 
 ---
 
@@ -43,7 +49,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 > Created: {today's date}
 > Project: {project-name}
 > Feature ID: {feature-name}
-> Depends on: technical-design.md, api-spec.md (if present)
+> Depends on: technical-design.md, api-spec.md (if required)
 
 ## Overview
 
@@ -53,6 +59,14 @@ Brief summary of the testing approach and any important notes about test coverag
 
 Every test spec must declare the following so a master runner (if this project has one) can include it
 automatically. This section is required and must be filled in — do not leave it blank.
+
+### Levels
+
+| Level | Required / Optional / Not Applicable | Reason (if not Required) |
+|---|---|---|
+| Unit | | |
+| Integration | | |
+| End-to-End | | |
 
 ### Suites
 
@@ -77,23 +91,25 @@ automatically. This section is required and must be filled in — do not leave i
 
 ## Unit Tests (Tier 1)
 
-Test individual functions, methods, and components in isolation.
+Test individual functions, methods, and components in isolation. Omit this section only if Unit is marked Not Applicable above.
 
 ### {Component or Module Name}
 
-| ID | Test | Input | Expected Output | Notes |
-|---|---|---|---|---|
-| UT-1 | | | | |
+| ID | Test | Input | Expected Output | Covers | Notes |
+|---|---|---|---|---|---|
+| UT-1 | | | | AC-1 | |
 
 (Repeat for each component that has non-trivial logic. Skip purely structural/config code.)
 
 ## Integration Tests (Tier 2)
 
-Test interactions between components or services.
+Test interactions between components or services. Omit this section only if Integration is marked Not Applicable above.
 
 ### {Integration Scenario Name}
 
 **ID:** IT-1
+
+**Covers:** AC-N
 
 **Components involved:** List the components/services being tested together.
 
@@ -109,11 +125,13 @@ Test interactions between components or services.
 
 ## End-to-End Tests (Tier 2/3)
 
-Test complete user journeys from the user's perspective.
+Test complete user journeys from the user's perspective. Omit this section only if End-to-End is marked Not Applicable above.
 
 ### {Journey Name}
 
 **ID:** E2E-1
+
+**Covers:** AC-N
 
 **Preconditions:** What must be true before this journey begins.
 
@@ -126,7 +144,7 @@ Test complete user journeys from the user's perspective.
 
 **Variants to test:**
 - Happy path
-- (List meaningful variants — e.g. offline, error states, edge inputs — give each its own ID, e.g. E2E-1a)
+- (List meaningful variants — e.g. offline, error states, edge inputs — give each its own ID, e.g. E2E-1a, and its own Covers if it validates a different AC)
 
 (Repeat for each end-to-end journey.)
 
@@ -134,9 +152,9 @@ Test complete user journeys from the user's perspective.
 
 Test boundary conditions, error states, and unexpected inputs.
 
-| ID | Edge Case | Test Approach | Expected Behaviour |
-|---|---|---|---|
-| EC-1 | | | |
+| ID | Edge Case | Test Approach | Expected Behaviour | Covers |
+|---|---|---|---|---|
+| EC-1 | | | | AC-N |
 
 (Source edge cases from technical-design.md and the acceptance criteria in feature-brief.md.)
 
@@ -144,9 +162,9 @@ Test boundary conditions, error states, and unexpected inputs.
 
 Only include if the feature has performance-sensitive paths (e.g. real-time processing, high-frequency data, large payloads, high concurrency).
 
-| ID | Scenario | Load | Success Threshold |
-|---|---|---|---|
-| PT-1 | | | |
+| ID | Scenario | Load | Success Threshold | Covers |
+|---|---|---|---|---|
+| PT-1 | | | | — |
 
 ## Test Data Requirements
 
@@ -158,12 +176,11 @@ List any specific data that needs to exist or be generated to run these tests.
 
 A test run is considered passing when:
 
-1. All unit tests pass
-2. All integration tests pass
-3. All end-to-end journeys complete successfully on both happy path and defined variants
-4. All edge cases are handled without crashes or data loss
-5. Performance thresholds are met (if applicable)
-6. All acceptance criteria from feature-brief.md are verified by at least one test
+1. All Required-level tests pass (Optional levels, if run, should also pass but do not block)
+2. All end-to-end journeys complete successfully on both happy path and defined variants (if End-to-End is Required)
+3. All edge cases are handled without crashes or data loss
+4. Performance thresholds are met (if applicable)
+5. Every acceptance criterion from feature-brief.md is covered by at least one test with a matching Covers reference
 
 ## Open Questions
 
@@ -175,13 +192,14 @@ List any unresolved testing questions. Leave blank if none.
 
 Before running the next skill, confirm:
 
-- [ ] Unit tests cover all non-trivial logic
-- [ ] Integration tests cover all key component interactions
-- [ ] End-to-end tests cover all user journeys including offline and error paths (if applicable)
-- [ ] Every acceptance criterion from the Feature Brief is covered by at least one test
+- [ ] Each of Unit / Integration / End-to-End is explicitly marked Required, Optional, or Not Applicable, with a reason for anything not Required
+- [ ] Unit tests cover all non-trivial logic (if Required)
+- [ ] Integration tests cover all key component interactions (if Required)
+- [ ] End-to-end tests cover all user journeys including offline and error paths, if applicable (if Required)
+- [ ] Every acceptance criterion from the Feature Brief is covered by at least one test's Covers field
+- [ ] Every test has a stable ID and a Covers reference (or `—` with good reason)
 - [ ] Every edge case from the Technical Design is covered
 - [ ] Pass/fail criteria are specific and measurable
-- [ ] Every test has a stable ID
 - [ ] **Test Suite Metadata section is complete** — all suites named with tier and runner command
 - [ ] **Runner command(s) specified** and verified against the application repository's actual tooling
 - [ ] **Report format confirmed**

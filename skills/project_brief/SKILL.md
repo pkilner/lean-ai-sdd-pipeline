@@ -11,11 +11,13 @@ The argument passed to this skill is the project name in kebab-case.
 
 2. Read any existing `projects/{project-name}/project-brief.md` (in case this is a revision, not a first draft).
 
-3. Generate `projects/{project-name}/project-brief.md` using the template below.
+3. Generate `projects/{project-name}/project-brief.md` using the template below. It always starts `Status: Draft`, even when revising an already-Approved brief — a revision must be re-reviewed before it counts as approved again.
 
 4. Update the `description` field in `project.yaml` to match the one-sentence Summary from the brief.
 
 5. After writing the file, present the Review Checklist to the user.
+
+6. **Review gate:** if the user confirms the checklist is satisfied (in this turn or a follow-up), update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Do not change the status without explicit user confirmation. Until this document is Approved, `project_architecture` and `feature_init` will refuse to proceed.
 
 ---
 

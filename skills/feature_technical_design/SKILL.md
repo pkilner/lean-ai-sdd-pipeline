@@ -1,18 +1,17 @@
 ---
-name: sdd_tech_design
-description: Generate a Technical Design document — the second step in the spec-driven pipeline. Defines how the feature is built across the project's system layers, including data flow, algorithms, and (where applicable) offline behaviour and sync strategy.
+name: feature_technical_design
+description: Generate a Technical Design document — the third step in the feature workflow. Defines how the feature is built across the project's system layers, including data flow, algorithms, and (where applicable) offline behaviour and sync strategy.
 ---
 
-The argument passed to this skill is the feature name in kebab-case. Use it as the feature identifier throughout.
+The arguments passed to this skill are the project name in kebab-case, followed by the feature name in kebab-case.
 
 ## Steps
 
 1. Read the following for context:
-   - `docs/features/{feature-name}/01_feature_brief.md` (required — do not proceed if missing)
-   - `docs/mindmaps/architecture.md` (if it exists — this defines the project's actual system layers, e.g. Frontend/Backend/Database, or On-Device/Cloud for offline-first mobile apps)
-   - Any architecture or strategy docs under `docs/product/`
+   - `projects/{project-name}/features/{feature-name}/feature-brief.md` (required — do not proceed if missing)
+   - `projects/{project-name}/architecture.md` (if it exists — this defines the project's actual system layers, e.g. Frontend/Backend/Database, or On-Device/Cloud for offline-first mobile apps)
 
-2. Generate `docs/features/{feature-name}/02_tech_design.md` using the template below. Use the *actual* layer names for this project (from `docs/mindmaps/architecture.md`) instead of the placeholders shown.
+2. Generate `projects/{project-name}/features/{feature-name}/technical-design.md` using the template below. Use the *actual* layer names for this project (from `architecture.md`) instead of the placeholders shown.
 
 3. After writing the file, present the Review Checklist to the user.
 
@@ -25,8 +24,9 @@ The argument passed to this skill is the feature name in kebab-case. Use it as t
 
 > Status: Draft
 > Created: {today's date}
+> Project: {project-name}
 > Feature ID: {feature-name}
-> Depends on: 01_feature_brief.md
+> Depends on: feature-brief.md
 
 ## Approach Summary
 
@@ -34,7 +34,7 @@ Two to four sentences describing the overall technical approach.
 
 ## Design by Layer
 
-For each system layer this feature touches (use this project's real layer names — e.g. Frontend, Backend, Database, On-Device, Cloud — repeat this subsection per layer):
+For each system layer this feature touches (use this project's real layer names — repeat this subsection per layer):
 
 ### {Layer Name}
 
@@ -42,7 +42,7 @@ For each system layer this feature touches (use this project's real layer names 
 
 **Data flow:** How data moves through this layer for this feature. Use a numbered sequence if helpful.
 
-**Storage:** What gets persisted in this layer, and the shape of that data (fields, types, relationships). Full schema detail comes in 03_api_spec.md.
+**Storage:** What gets persisted in this layer, and the shape of that data (fields, types, relationships). Full schema detail comes in api-spec.md.
 
 **Key algorithms or logic:** Any non-trivial logic that needs to run in this layer. Be specific — this will drive implementation tasks.
 
@@ -97,5 +97,5 @@ Before running the next skill, confirm:
 - [ ] Edge cases are covered
 - [ ] No open questions remain (or they are acceptable to carry forward)
 
-**Next step:** When approved, run `/sdd_api_spec {feature-name}`
+**Next step:** When approved, run `/feature_api_spec {project-name} {feature-name}` if this feature has contracts to define, otherwise skip to `/feature_test_spec {project-name} {feature-name}`
 ```

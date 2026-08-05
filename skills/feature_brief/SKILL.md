@@ -1,23 +1,20 @@
 ---
-name: sdd_feature_brief
-description: Generate a Feature Brief — the first document in the spec-driven development pipeline. Defines what is being built, why, for whom, and what done looks like.
+name: feature_brief
+description: Generate a Feature Brief — the second step in the feature workflow. Defines what is being built, why, for whom, and what done looks like.
 ---
 
-The argument passed to this skill is the feature name in kebab-case (e.g. `user-onboarding`). Use it as the feature identifier throughout.
+The arguments passed to this skill are the project name in kebab-case, followed by the feature name in kebab-case.
 
 ## Steps
 
-1. Read the following for context, if they exist (skip any that don't — do not fail if a project hasn't created them yet):
-   - `docs/mindmaps/project-overview.md`
-   - `docs/mindmaps/architecture.md`
-   - Any strategy or product docs under `docs/product/`
-   - Any existing files in `docs/features/{feature-name}/` (check if this feature has been partially started)
+1. Read the following for context (required — do not proceed if `projects/{project-name}/features/{feature-name}/` does not exist; tell the user to run `/feature_init` first):
+   - `projects/{project-name}/project-brief.md` (if it exists)
+   - `projects/{project-name}/architecture.md` (if it exists)
+   - Any existing `projects/{project-name}/features/{feature-name}/feature-brief.md` (in case this is a revision)
 
-2. If `docs/features/{feature-name}/` does not exist, create it.
+2. Generate `projects/{project-name}/features/{feature-name}/feature-brief.md` using the template below.
 
-3. Generate `docs/features/{feature-name}/01_feature_brief.md` using the template below.
-
-4. After writing the file, present the Review Checklist to the user.
+3. After writing the file, present the Review Checklist to the user.
 
 ---
 
@@ -28,6 +25,7 @@ The argument passed to this skill is the feature name in kebab-case (e.g. `user-
 
 > Status: Draft
 > Created: {today's date}
+> Project: {project-name}
 > Feature ID: {feature-name}
 
 ## Summary
@@ -64,7 +62,7 @@ Which parts of the product/system does this feature apply to — e.g. platforms,
 
 ## System Layers Involved
 
-List the layers relevant to this project (e.g. Frontend, Backend, Database, Infra — use whatever layer names this project's architecture doc actually uses).
+List the layers relevant to this project (use the layer names from `projects/{project-name}/architecture.md`).
 
 | Layer | Involved? | Notes |
 |---|---|---|
@@ -91,5 +89,5 @@ Before running the next skill, confirm:
 - [ ] Applicability is correct (or explicitly omitted)
 - [ ] Open questions are noted
 
-**Next step:** When approved, run `/sdd_tech_design {feature-name}`
+**Next step:** When approved, run `/feature_technical_design {project-name} {feature-name}`
 ```

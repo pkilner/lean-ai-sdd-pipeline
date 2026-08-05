@@ -1,20 +1,15 @@
 ---
-name: sdd_adr
-description: Create an Architecture Decision Record (ADR). Can be triggered at any point in the pipeline to capture a significant decision, the options considered, and the rationale. Pass the feature name and a short decision title as arguments.
+name: feature_adr
+description: Create a feature-level Architecture Decision Record (ADR). Can be triggered at any point in the feature workflow to capture a significant decision, the options considered, and the rationale. Pass the project name, feature name, and a short decision title as arguments.
 ---
 
-The argument passed to this skill is the feature name in kebab-case followed by a short decision title (e.g. `user-onboarding sync-conflict-strategy`). If no feature name is provided, the ADR is project-level.
+The arguments passed to this skill are the project name in kebab-case, the feature name in kebab-case, and a short decision title (e.g. `my-app user-onboarding sync-conflict-strategy`).
 
 ## Steps
 
-1. Parse the arguments:
-   - First word = feature name (or `project` if this is a project-level decision)
-   - Remaining words = decision title (convert to a readable title)
+1. Read `projects/{project-name}/features/{feature-name}/` (required — do not proceed if the feature has not been initialized).
 
-2. Determine the output path:
-   - Feature-level: `docs/features/{feature-name}/adr/`
-   - Project-level: `docs/adr/`
-   - Create the directory if it does not exist.
+2. Determine the output path: `projects/{project-name}/features/{feature-name}/adr/`. Create it if it does not exist (it is normally created by `feature_init`).
 
 3. Count existing ADR files in that directory to determine the next number (e.g. if `adr_001_*.md` exists, next is `adr_002`).
 
@@ -31,7 +26,8 @@ The argument passed to this skill is the feature name in kebab-case followed by 
 
 > Status: Accepted
 > Date: {today's date}
-> Feature: {feature-name} (or "Project-level")
+> Project: {project-name}
+> Feature: {feature-name}
 
 ## Context
 

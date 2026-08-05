@@ -1,18 +1,20 @@
 ---
-name: sdd_api_spec
-description: Generate an API & Schema Spec — the third step in the spec-driven pipeline. Defines exact contracts including API endpoints, request/response shapes, database schemas, event schemas, and validation rules.
+name: feature_api_spec
+description: Generate an API & Schema Spec — the fourth step in the feature workflow, only needed when the feature introduces or changes contracts. Defines exact contracts including API endpoints, request/response shapes, database schemas, event schemas, and validation rules.
 ---
 
-The argument passed to this skill is the feature name in kebab-case. Use it as the feature identifier throughout.
+The arguments passed to this skill are the project name in kebab-case, followed by the feature name in kebab-case.
+
+Skip this skill entirely for features with no new or changed contracts (e.g. a pure UI rearrangement) — go straight from `feature_technical_design` to `feature_test_spec`.
 
 ## Steps
 
 1. Read the following for context:
-   - `docs/features/{feature-name}/01_feature_brief.md` (required)
-   - `docs/features/{feature-name}/02_tech_design.md` (required — do not proceed if missing)
-   - `docs/mindmaps/architecture.md` (if it exists)
+   - `projects/{project-name}/features/{feature-name}/feature-brief.md` (required)
+   - `projects/{project-name}/features/{feature-name}/technical-design.md` (required — do not proceed if missing)
+   - `projects/{project-name}/architecture.md` (if it exists)
 
-2. Generate `docs/features/{feature-name}/03_api_spec.md` using the template below.
+2. Generate `projects/{project-name}/features/{feature-name}/api-spec.md` using the template below.
 
 3. After writing the file, present the Review Checklist to the user.
 
@@ -25,8 +27,9 @@ The argument passed to this skill is the feature name in kebab-case. Use it as t
 
 > Status: Draft
 > Created: {today's date}
+> Project: {project-name}
 > Feature ID: {feature-name}
-> Depends on: 02_tech_design.md
+> Depends on: technical-design.md
 
 ## Data Models
 
@@ -146,5 +149,5 @@ Before running the next skill, confirm:
 - [ ] Validation rules cover all inputs
 - [ ] No open questions remain
 
-**Next step:** When approved, run `/sdd_impl_plan {feature-name}`
+**Next step:** When approved, run `/feature_test_spec {project-name} {feature-name}`
 ```

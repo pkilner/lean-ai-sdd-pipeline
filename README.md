@@ -1,62 +1,142 @@
 # lean-ai-sdd-pipeline
 
-A lean, reusable **spec-driven development pipeline** for Claude Code — a set of skills that walk a feature from idea to fully-specified, test-covered implementation plan through five reviewable documents, plus two skills for keeping session-to-session project context fresh.
+A lean, practical **Spec-Driven Development pipeline** for Claude Code — Claude skills that take a project from initialization through feature specification to a fully-specified implementation plan, plus an issue-tracking workflow for defects, drift, and change requests.
 
-Extracted from real use across several feature cycles on a production project, then genericized to drop anything project-specific.
+It is intentionally **not** an enterprise ALM platform. The guiding principle:
 
-## What's in here
+> Provide the minimum amount of structure necessary to consistently produce high-quality software.
 
-### The pipeline (`sdd_*`)
+## Workspace layout
 
-Run these in order for each feature. Each step writes one document and ends with a human review checkpoint before the next begins — nothing proceeds automatically.
+This pipeline repository and the application(s) it specs live as sibling directories:
+
+```text
+workspace/
+├── lean-ai-sdd-pipeline/     ← this repo: specs, architecture, ADRs, issues, skills
+└── <application-repository>/ ← source code, tests, deployment, configuration
+```
+
+The pipeline repository owns specifications, architecture, ADRs, workflow, and issue tracking. The application repository owns only source code, tests, deployment, and configuration. **No Claude skills are copied into the application repository** — run Claude Code from this pipeline repo (or a workspace root that contains both as siblings), and skills reach into the application repo via each project's `repo_path`.
+
+## Repository layout
+
+```text
+lean-ai-sdd-pipeline/
+├── skills/
+│   ├── project_*
+│   ├── feature_*
+│   ├── issue_*
+│   └── system_*
+│
+└── projects/
+    └── <project-name>/
+        ├── project.yaml
+        ├── project-brief.md
+        ├── architecture.md
+        ├── adr/
+        ├── features/
+        │   └── <feature-name>/
+        │       ├── feature-brief.md
+        │       ├── technical-design.md
+        │       ├── api-spec.md
+        │       ├── test-spec.md
+        │       ├── implementation-plan.md
+        │       └── adr/
+        └── issues/
+            └── ISSUE-xxxx/
+                ├── issue.md
+                ├── investigation.md
+                ├── resolution.md
+                └── verification.md
+```
+
+A project can wrap one application repository. The `projects/` directory supports more than one project if this pipeline repo is used to spec multiple applications.
+
+## Skill namespaces
+
+Every skill lives in exactly one of four namespaces.
+
+### `project_*` — project lifecycle (user-facing)
 
 | Skill | Step | Produces | Purpose |
 |---|---|---|---|
-| `sdd_feature_brief` | 1 | `01_feature_brief.md` | What to build — user stories, acceptance criteria, scope |
-| `sdd_tech_design` | 2 | `02_tech_design.md` | How to build it — design per system layer, data flow, offline/sync if applicable |
-| `sdd_api_spec` | 3 | `03_api_spec.md` | Exact contracts — data models, DB schema, endpoints, event schemas |
-| `sdd_impl_plan` | 4 | `04_impl_plan.md` | Individual coding tasks in dependency order, with test tiers assigned |
-| `sdd_test_spec` | 5 | `05_test_spec.md` | Unit, integration, and end-to-end tests; pass/fail criteria |
-| `sdd_adr` | any | `adr_NNN_*.md` | Capture a significant architectural decision and its rationale, at any point |
-| `sdd_consistency_check` | any | report only | Read-only diagnostic — cross-references field names, formulas, and test coverage across all five docs and the implementation; flags drift |
+| `project_init` | 1 | `project.yaml` + scaffold | Register a project and point it at its application repo |
+| `project_brief` | 2 | `project-brief.md` | What the project is, who it's for, what success looks like |
+| `project_architecture` | 3 | `architecture.md` | System layers, key technical decisions, data stores |
+| `project_adr` | as needed | `adr/adr_NNN_*.md` | Record a project-wide architectural decision |
 
-Documents are written to `docs/features/<feature-name>/` in the target project, numbered so the build order is obvious at a glance.
+### `feature_*` — feature lifecycle (user-facing)
 
-### Session continuity (`orient`, `update_mindmaps`)
+Run in order for each feature. Each step ends with a human review checkpoint — nothing proceeds automatically.
+
+| Skill | Step | Produces | Purpose |
+|---|---|---|---|
+| `feature_init` | 1 | scaffold | Create the feature's directory |
+| `feature_brief` | 2 | `feature-brief.md` | What to build — user stories, acceptance criteria, scope |
+| `feature_technical_design` | 3 | `technical-design.md` | How to build it — design per system layer, data flow |
+| `feature_api_spec` | 4 (if needed) | `api-spec.md` | Exact contracts — data models, DB schema, endpoints, events |
+| `feature_test_spec` | 5 | `test-spec.md` | Unit, integration, and end-to-end tests — **defines "done"** |
+| `feature_implementation_plan` | 6 | `implementation-plan.md` | Coding tasks in dependency order, each mapped to the tests it satisfies |
+| `feature_adr` | as needed | `adr/adr_NNN_*.md` | Record a feature-level architectural decision |
+| — | 7 | (code) | Implementation, in the application repository |
+
+The test spec comes **before** the implementation plan. Tests define what "done" means; the implementation plan exists to satisfy them, not the other way around. Every implementation task references the test IDs it satisfies.
+
+### `issue_*` — issue lifecycle (user-facing)
+
+Issues are **siblings of features**, not nested beneath them — an issue can span multiple features.
+
+| Skill | Step | Produces | Purpose |
+|---|---|---|---|
+| `issue_capture` | 1 | `issue.md` | Record what was observed |
+| `system_issue_classify` | 2 | updates `issue.md` | Assign a category (see below) |
+| `issue_investigate` | 3 | `investigation.md` | Root cause + reconciliation classification |
+| `issue_resolve` | 4 | `resolution.md` | Apply the fix (spec, code, or both) |
+| `issue_verify` | 5 | `verification.md` | Confirm the fix actually works, close the issue |
+| `system_consistency_review` | 6 | report only | Confirm no residual drift was introduced |
+
+Issue categories: Defect, Documentation drift, Design defect, Implementation drift, Test gap, Change request, Dependency/environment issue.
+
+### `system_*` — governance and orchestration (not user-facing)
+
+Invoked by Claude or by other skills, though nothing stops you from running one directly.
 
 | Skill | Purpose |
 |---|---|
-| `orient` | Read `CLAUDE.md` + `docs/mindmaps/` and deliver a briefing: what exists, what's in progress, what's next |
-| `update_mindmaps` | Regenerate `docs/mindmaps/*.md` from current docs, code, and git history — run at the end of a work session |
+| `system_issue_classify` | Assign an issue's category |
+| `system_consistency_review` | Read-only cross-check of a feature's (or a whole project's) docs against the implementation |
+| `system_next_step` | Inspect existing artifacts and report the next command to run |
+| `system_workflow_resume` | Full briefing on a project's state — what exists, what's in progress, what's next |
 
-These solve a different problem than the `sdd_*` pipeline: instead of specifying one feature, they keep a running, low-token-cost summary of the *whole project* so a new session (or a new person) can get oriented in one read instead of re-deriving state from git history and scattered docs.
+## Reconciliation
 
-## Installing into a project
+When code and documentation disagree, never assume one is correct by default. Classify the mismatch first:
 
-1. Copy the contents of `skills/` into the target project's `.claude/skills/`:
+- Code defect
+- Documentation drift
+- Unapproved implementation change
+- Ambiguous intent
+- Scope change
 
-   ```bash
-   cp -r skills/* /path/to/target-project/.claude/skills/
-   ```
+Then recommend the corrective action. Documents are not automatically rewritten to match code — `issue_investigate` performs this classification as part of the issue workflow.
 
-2. Copy the mind map starters into the target project (skip if it already has `docs/mindmaps/`):
+## Getting started
 
-   ```bash
-   mkdir -p /path/to/target-project/docs/mindmaps
-   cp templates/mindmaps/*.md /path/to/target-project/docs/mindmaps/
-   ```
-
-3. Add the block from `CLAUDE.md.template` (in this repo) into the target project's `CLAUDE.md`, adjusting anything project-specific.
-
-4. Fill in the three `docs/mindmaps/*.md` files for the project (or run `/update_mindmaps` once there's enough in the repo for Claude to infer them).
+1. Point Claude Code at a workspace root that contains this repo and your application repo as siblings (or run it from inside this repo, if the application repo's absolute/relative path is reachable).
+2. `/project_init <project-name> <repo-path-to-application-repo>`
+3. `/project_brief <project-name>` → `/project_architecture <project-name>`
+4. `/feature_init <project-name> <feature-name>` → walk the `feature_*` pipeline in order.
+5. When something goes wrong: `/issue_capture <project-name> "<description>"` → walk the `issue_*` pipeline in order.
+6. Anytime: `/system_workflow_resume <project-name>` to get re-oriented, or `/system_next_step <project-name> [feature-name|issue-id]` for a single next command.
 
 ## Design notes / why it's structured this way
 
-- **One document, one review gate, per step.** Each `sdd_*` skill refuses to proceed if its required upstream document is missing — this keeps a feature from drifting ahead of what's actually been agreed.
-- **Change propagation is top-down.** `01 → 02 → 03 → 04 → 05 → implementation`. If a change originates in the implementation (e.g. a bug discovery), update upward first, then confirm downward. `sdd_consistency_check` exists specifically to catch when this discipline slips.
-- **Layer names are not hardcoded.** The original version of this pipeline assumed an offline-first mobile app (On-Device/Cloud/Sync). This version pulls layer names from the target project's own `docs/mindmaps/architecture.md`, so it fits a plain web app, a data pipeline, or anything else without editing the skills themselves.
-- **Test tiers are stack-agnostic.** Tier 1 (unit, no environment) → Tier 2 (integration/UI, needs an emulator/browser/local stack) → Tier 3 (system/performance, needs a real device or staging environment) → Tier 4 (manual/field acceptance). Every implementation task gets a Tier 1 assignment as part of its definition of done; Tiers 2–4 are always batched into a dedicated phase at the end.
-- **Documentation is a task, not an afterthought.** Every implementation plan requires an explicit documentation task calling out which types/functions need doc comments — not a vague "add docs" line.
+- **One document, one review gate, per step.** Each `feature_*` and `project_*` skill refuses to proceed if its required upstream document is missing — this keeps work from drifting ahead of what's actually been agreed.
+- **Change propagation is top-down.** `feature-brief → technical-design → api-spec → test-spec → implementation-plan → implementation`. If a change originates in the implementation (e.g. a bug discovery), update upward first, then confirm downward. `system_consistency_review` exists specifically to catch when this discipline slips.
+- **Tests come before the implementation plan.** This flips the historical order in this pipeline on purpose: tests are the definition of "done", not an afterthought validated against whatever got built.
+- **Layer names are not hardcoded.** `project_architecture` derives the project's real system layers (Frontend/Backend/Database, On-Device/Cloud, or whatever fits) once, and every other skill pulls from it — no skill assumes a specific stack.
+- **Issues are first-class, not an afterthought bolted onto features.** They live as siblings of features because a single issue can span several of them, and because "something is wrong" is a fundamentally different workflow from "build something new."
+- **No skills in the application repository.** Keeping all pipeline machinery in one repo means an application repo stays clean of tooling that isn't actually part of the shipped product, and one pipeline repo can spec more than one application if needed.
 
 ## License
 

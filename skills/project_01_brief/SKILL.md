@@ -1,5 +1,5 @@
 ---
-name: project_brief
+name: project_01_brief
 description: Generate a Project Brief — the second step in the project workflow. Defines what the project is, who it is for, and what success looks like, at the whole-project level (not a single feature).
 ---
 
@@ -7,17 +7,17 @@ The argument passed to this skill is the project name in kebab-case.
 
 ## Steps
 
-1. Read `projects/{project-name}/project.yaml` (required — do not proceed if the project has not been initialized; tell the user to run `/project_init` first).
+1. Read `projects/{project-name}/project.yaml` (required — do not proceed if the project has not been initialized; tell the user to run `/project_00_init` first).
 
-2. Read any existing `projects/{project-name}/project-brief.md` (in case this is a revision, not a first draft).
+2. Read any existing `projects/{project-name}/01_project_brief.md` (in case this is a revision, not a first draft).
 
-3. Generate `projects/{project-name}/project-brief.md` using the template below. It always starts `Status: Draft`, even when revising an already-Approved brief — a revision must be re-reviewed before it counts as approved again.
+3. Generate `projects/{project-name}/01_project_brief.md` using the template below. It always starts `Status: Draft`, even when revising an already-Approved brief — a revision must be re-reviewed before it counts as approved again.
 
 4. Update the `description` field in `project.yaml` to match the one-sentence Summary from the brief.
 
 5. After writing the file, present the Review Checklist to the user.
 
-6. **Review gate:** if the user confirms the checklist is satisfied (in this turn or a follow-up), update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Do not change the status without explicit user confirmation. Until this document is Approved, `project_architecture` and `feature_init` will refuse to proceed.
+6. **Review gate:** if the user confirms the checklist is satisfied (in this turn or a follow-up), update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Do not change the status without explicit user confirmation. Until this document is Approved, `project_02_architecture` and `feature_00_init` will refuse to proceed.
 
 ---
 
@@ -74,5 +74,5 @@ Before running the next skill, confirm:
 - [ ] Scope boundaries are clear
 - [ ] Open questions are noted
 
-**Next step:** When approved, run `/project_architecture {project-name}`
+**Next step:** When approved, run `/project_02_architecture {project-name}`
 ```

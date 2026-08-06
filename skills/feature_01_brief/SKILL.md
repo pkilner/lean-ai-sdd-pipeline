@@ -1,5 +1,5 @@
 ---
-name: feature_brief
+name: feature_01_brief
 description: Generate a Feature Brief — the second step in the feature workflow. Defines what is being built, why, for whom, and what done looks like, with stable AC-N acceptance criteria identifiers.
 ---
 
@@ -7,21 +7,21 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 ## Steps
 
-1. Read the following for context (required — do not proceed if `projects/{project-name}/features/{feature-name}/` does not exist; tell the user to run `/feature_init` first):
-   - `projects/{project-name}/project-brief.md` (if it exists)
-   - `projects/{project-name}/architecture.md` (if it exists)
-   - Any existing `projects/{project-name}/features/{feature-name}/feature-brief.md` (in case this is a revision)
+1. Read the following for context (required — do not proceed if `projects/{project-name}/features/{feature-name}/` does not exist; tell the user to run `/feature_00_init` first):
+   - `projects/{project-name}/01_project_brief.md` (if it exists)
+   - `projects/{project-name}/02_project_architecture.md` (if it exists)
+   - Any existing `projects/{project-name}/features/{feature-name}/01_feature_brief.md` (in case this is a revision)
 
-2. Generate `projects/{project-name}/features/{feature-name}/feature-brief.md` using the template below. It always starts `Status: Draft`.
+2. Generate `projects/{project-name}/features/{feature-name}/01_feature_brief.md` using the template below. It always starts `Status: Draft`.
 
-3. Give every acceptance criterion a stable identifier: `AC-1`, `AC-2`, `AC-3`, etc. These identifiers are permanent once `technical-design.md`, `test-spec.md`, or any other downstream document references them — **never renumber an existing AC**, even across revisions. If revising a brief that already has downstream artifacts:
+3. Give every acceptance criterion a stable identifier: `AC-1`, `AC-2`, `AC-3`, etc. These identifiers are permanent once `02_technical_design.md`, `04_test_spec.md`, or any other downstream document references them — **never renumber an existing AC**, even across revisions. If revising a brief that already has downstream artifacts:
    - Editing the wording of an existing AC in place is fine.
    - A genuinely new criterion gets the next unused number (highest existing AC number + 1), even if a lower number was previously retired.
    - A criterion that no longer applies is marked `Retired` in place, not deleted and not renumbered — downstream references to it stay resolvable.
 
 4. After writing the file, present the Review Checklist to the user.
 
-5. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Until this document is Approved, `feature_technical_design` will refuse to proceed.
+5. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Until this document is Approved, `feature_02_technical_design` will refuse to proceed.
 
 ---
 
@@ -69,7 +69,7 @@ Which parts of the product/system does this feature apply to — e.g. platforms,
 
 ## System Layers Involved
 
-List the layers relevant to this project (use the layer names from `projects/{project-name}/architecture.md`).
+List the layers relevant to this project (use the layer names from `projects/{project-name}/02_project_architecture.md`).
 
 | Layer | Involved? | Notes |
 |---|---|---|
@@ -96,5 +96,5 @@ Before running the next skill, confirm:
 - [ ] Applicability is correct (or explicitly omitted)
 - [ ] Open questions are noted
 
-**Next step:** When approved, run `/feature_technical_design {project-name} {feature-name}`
+**Next step:** When approved, run `/feature_02_technical_design {project-name} {feature-name}`
 ```

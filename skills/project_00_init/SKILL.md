@@ -1,5 +1,5 @@
 ---
-name: project_init
+name: project_00_init
 description: Initialize a new project under projects/{project-name}/ — validates the sibling application repository, then creates project.yaml and the base directory scaffold. First step in the project workflow, run once per project.
 ---
 
@@ -41,12 +41,12 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 ```yaml
 name: {project-name}
 repo_path: {normalized-relative-repo-path}
-description: TBD — run /project_brief {project-name}
+description: TBD — run /project_01_brief {project-name}
 created: {today's date}
 status: active
 ```
 
-- `repo_path` is always stored as a normalized relative path from this pipeline repo's root, validated per Step 2 above. Every other skill that needs to inspect or reference application source code (e.g. `system_consistency_review`, `issue_investigate`) reads this field — never re-derive or guess it elsewhere.
+- `repo_path` is always stored as a normalized relative path from this pipeline repo's root, validated per Step 2 above. Every other skill that needs to inspect or reference application source code (e.g. `system_consistency_review`, `issue_02_investigate`) reads this field — never re-derive or guess it elsewhere.
 - `status` is one of `active`, `paused`, `archived`.
 
-**Next step:** Run `/project_brief {project-name}`.
+**Next step:** Run `/project_01_brief {project-name}`.

@@ -1,6 +1,6 @@
 ---
-name: issue_capture
-description: Capture a new issue — the first step in the issue workflow. Creates projects/{project-name}/issues/ISSUE-xxxx/ with an issue.md describing what was observed, then automatically classifies it. Issues are siblings of features, not nested beneath them.
+name: issue_01_capture
+description: Capture a new issue — the first step in the issue workflow. Creates projects/{project-name}/issues/ISSUE-xxxx/ with an 01_issue.md describing what was observed, then automatically classifies it. Issues are siblings of features, not nested beneath them.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by a short free-text description of what was observed (e.g. `my-app "sync fails silently when offline for more than 24h"`).
@@ -13,7 +13,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 3. Create `projects/{project-name}/issues/ISSUE-{xxxx}/`.
 
-4. Generate `issue.md` using the template below.
+4. Generate `01_issue.md` using the template below.
 
 5. **Automatically invoke `system_issue_classify {project-name} {issue-id}`** before ending your turn — do not wait for the user to request it. This is an internal orchestration step, not something the user needs to trigger. Present the resulting Category to the user alongside the captured issue.
 
@@ -59,4 +59,4 @@ If known: who/what is affected, and how badly.
 | {today's date} | Open | Captured |
 ```
 
-**Next step:** classification happens automatically as part of this skill. Once you see the Category, run `/issue_investigate {project-name} {issue-id}`.
+**Next step:** classification happens automatically as part of this skill. Once you see the Category, run `/issue_02_investigate {project-name} {issue-id}`.

@@ -1,5 +1,5 @@
 ---
-name: feature_implementation_plan
+name: feature_05_implementation_plan
 description: Generate an Implementation Plan — the sixth step in the feature workflow, run after the Test Spec. Breaks the feature into individual coding tasks with dependencies, build order, layer assignment, a Status column for tracking real progress, and an explicit mapping to the tests each task satisfies. Tests define "done"; this plan exists to satisfy them.
 ---
 
@@ -8,19 +8,19 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 ## Steps
 
 1. Read the following for context:
-   - `projects/{project-name}/features/{feature-name}/feature-brief.md` (required)
-   - `projects/{project-name}/features/{feature-name}/technical-design.md` (required)
-   - `projects/{project-name}/features/{feature-name}/api-spec.md` (if it exists)
-   - `projects/{project-name}/features/{feature-name}/test-spec.md` (required — do not proceed if missing)
-   - `projects/{project-name}/architecture.md` (if it exists)
+   - `projects/{project-name}/features/{feature-name}/01_feature_brief.md` (required)
+   - `projects/{project-name}/features/{feature-name}/02_technical_design.md` (required)
+   - `projects/{project-name}/features/{feature-name}/03_api_spec.md` (if it exists)
+   - `projects/{project-name}/features/{feature-name}/04_test_spec.md` (required — do not proceed if missing)
+   - `projects/{project-name}/02_project_architecture.md` (if it exists)
 
-2. **Review gate:** check `test-spec.md`'s Status. If `Draft`, stop here and tell the user it needs review and approval first. If the user confirms approval in response, update its Status to `Approved`, then continue.
+2. **Review gate:** check `04_test_spec.md`'s Status. If `Draft`, stop here and tell the user it needs review and approval first. If the user confirms approval in response, update its Status to `Approved`, then continue.
 
-3. Generate `projects/{project-name}/features/{feature-name}/implementation-plan.md` using the template below. Every task starts with **Status: Not Started**.
+3. Generate `projects/{project-name}/features/{feature-name}/05_implementation_plan.md` using the template below. Every task starts with **Status: Not Started**.
 
 4. Tasks must be broken down to the level of individual coding tasks — not milestones or epics. Each task should be something a developer can pick up and complete independently.
 
-5. Every task table must include a **Tests Satisfied** column listing the test IDs from `test-spec.md` (e.g. `UT-3, UT-4`) that this task's implementation makes possible to write and pass. Tier 1 (unit) tests should be satisfied by the task that implements the logic they cover; Tiers 2–4 are satisfied collectively by a dedicated phase after implementation tasks are complete. Every test ID in `test-spec.md` must be referenced by at least one task or phase and appear in the Test Coverage Map — if a test has no home, that is a gap in either the plan or the test spec and must be resolved before proceeding.
+5. Every task table must include a **Tests Satisfied** column listing the test IDs from `04_test_spec.md` (e.g. `UT-3, UT-4`) that this task's implementation makes possible to write and pass. Tier 1 (unit) tests should be satisfied by the task that implements the logic they cover; Tiers 2–4 are satisfied collectively by a dedicated phase after implementation tasks are complete. Every test ID in `04_test_spec.md` must be referenced by at least one task or phase and appear in the Test Coverage Map — if a test has no home, that is a gap in either the plan or the test spec and must be resolved before proceeding.
 
 6. Every implementation plan must include a dedicated documentation task for each phase (or a consolidated documentation phase at the end). Documentation tasks cover, specifically:
    - Public interfaces (what a caller outside the module needs to know)
@@ -50,7 +50,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 > Created: {today's date}
 > Project: {project-name}
 > Feature ID: {feature-name}
-> Depends on: test-spec.md
+> Depends on: 04_test_spec.md
 > Verified: Not yet
 
 ## Overview
@@ -59,7 +59,7 @@ Brief summary of the build approach and any important sequencing notes.
 
 ## Layer Key
 
-Define one letter per system layer used in this project (pull these from `projects/{project-name}/architecture.md` — do not default to the example below unless it's actually accurate for this project).
+Define one letter per system layer used in this project (pull these from `projects/{project-name}/02_project_architecture.md` — do not default to the example below unless it's actually accurate for this project).
 
 Example for a client/server web app:
 - **F** — Frontend
@@ -92,7 +92,7 @@ Tasks are numbered in build order. A task cannot begin until all tasks it depend
 
 ### Phase N: Tier 2–4 Tests
 
-List all Tier 2, 3, and 4 tests here as tasks, after all implementation phases are complete. Reference `test-spec.md` for details. Skip levels marked Not Applicable in test-spec.md's Test Suite Metadata.
+List all Tier 2, 3, and 4 tests here as tasks, after all implementation phases are complete. Reference `04_test_spec.md` for details. Skip levels marked Not Applicable in 04_test_spec.md's Test Suite Metadata.
 
 | # | Task | Layer | Depends On | Tests Satisfied | Status | Notes |
 |---|---|---|---|---|---|---|
@@ -102,7 +102,7 @@ List all Tier 2, 3, and 4 tests here as tasks, after all implementation phases a
 
 ## Test Coverage Map
 
-Confirm every test ID from `test-spec.md` is satisfied by at least one task above, and carry forward the acceptance criterion each test covers for end-to-end traceability from AC to task.
+Confirm every test ID from `04_test_spec.md` is satisfied by at least one task above, and carry forward the acceptance criterion each test covers for end-to-end traceability from AC to task.
 
 | Test ID | Covers (AC) | Satisfied By Task # |
 |---|---|---|
@@ -138,11 +138,11 @@ Before starting implementation, confirm:
 
 - [ ] Every task is at the level of an individual coding task (not a milestone or epic)
 - [ ] Build order is correct — no task depends on something that comes after it
-- [ ] Layer assignments are correct and match the layers used in technical-design.md
+- [ ] Layer assignments are correct and match the layers used in 02_technical_design.md
 - [ ] All components from the technical design are represented in the task list
 - [ ] All schema and API work from the API spec has corresponding tasks
 - [ ] Every task has a Tests Satisfied column entry (specific test IDs or "—") and a Status of Not Started
-- [ ] Every test ID in test-spec.md appears in the Test Coverage Map with its Covers (AC) carried forward
+- [ ] Every test ID in 04_test_spec.md appears in the Test Coverage Map with its Covers (AC) carried forward
 - [ ] Tier 2, 3, and 4 tests are in a dedicated final phase
 - [ ] Documentation tasks are present and call out specific interfaces/behaviours/config to document
 - [ ] Milestones are meaningful and achievable

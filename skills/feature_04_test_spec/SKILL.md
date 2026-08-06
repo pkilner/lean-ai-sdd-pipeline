@@ -1,5 +1,5 @@
 ---
-name: feature_test_spec
+name: feature_04_test_spec
 description: Generate a Test Spec — the fifth step in the feature workflow, run before the Implementation Plan. Defines unit, integration, and end-to-end tests (each marked Required/Optional/Not Applicable), maps every test to the acceptance criteria it validates, and sets pass/fail criteria. Tests define "done" — the implementation plan is built to satisfy these tests, not the other way around.
 ---
 
@@ -8,17 +8,17 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 ## Steps
 
 1. Read the following for context:
-   - `projects/{project-name}/features/{feature-name}/feature-brief.md` (required — this is where AC-N identifiers come from)
-   - `projects/{project-name}/features/{feature-name}/technical-design.md` (required)
-   - `projects/{project-name}/features/{feature-name}/api-spec.md` (required only if technical-design.md's `API Specification Required` is `Yes`)
+   - `projects/{project-name}/features/{feature-name}/01_feature_brief.md` (required — this is where AC-N identifiers come from)
+   - `projects/{project-name}/features/{feature-name}/02_technical_design.md` (required)
+   - `projects/{project-name}/features/{feature-name}/03_api_spec.md` (required only if 02_technical_design.md's `API Specification Required` is `Yes`)
 
-2. **Review gate:** confirm `technical-design.md` has `Status: Approved`, and `api-spec.md` too if it is required for this feature. If either is still `Draft`, stop here and tell the user which document needs review/approval first. If the user confirms approval in response, update that document's Status to `Approved`, then continue.
+2. **Review gate:** confirm `02_technical_design.md` has `Status: Approved`, and `03_api_spec.md` too if it is required for this feature. If either is still `Draft`, stop here and tell the user which document needs review/approval first. If the user confirms approval in response, update that document's Status to `Approved`, then continue.
 
-3. Generate `projects/{project-name}/features/{feature-name}/test-spec.md` using the template below.
+3. Generate `projects/{project-name}/features/{feature-name}/04_test_spec.md` using the template below.
 
-4. Give every test a stable ID (`UT-N` for unit, `IT-N` for integration, `E2E-N` for end-to-end, `EC-N` for edge case, `PT-N` for performance). `feature_implementation_plan` references these IDs directly — do not renumber tests once `implementation-plan.md` exists without also updating it.
+4. Give every test a stable ID (`UT-N` for unit, `IT-N` for integration, `E2E-N` for end-to-end, `EC-N` for edge case, `PT-N` for performance). `feature_05_implementation_plan` references these IDs directly — do not renumber tests once `05_implementation_plan.md` exists without also updating it.
 
-5. Every test must state which acceptance criterion (or criteria) it validates, using the `AC-N` identifiers from `feature-brief.md`, in a **Covers** column/field. A test with no functional AC to validate (e.g. a pure performance benchmark) may use `—`, but this should be the exception, not the default — most tests should trace back to an AC.
+5. Every test must state which acceptance criterion (or criteria) it validates, using the `AC-N` identifiers from `01_feature_brief.md`, in a **Covers** column/field. A test with no functional AC to validate (e.g. a pure performance benchmark) may use `—`, but this should be the exception, not the default — most tests should trace back to an AC.
 
 6. For each of the three test levels (Unit, Integration, End-to-End), explicitly mark it `Required`, `Optional`, or `Not Applicable` in the Test Suite Metadata section, with a one-line reason for anything not `Required`. A small utility feature may legitimately mark Integration and/or End-to-End as `Not Applicable` — do not force coverage that doesn't fit the feature's shape. Unit is `Required` unless the feature genuinely has no non-trivial logic.
 
@@ -29,7 +29,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 8. After writing the file, present the Review Checklist to the user.
 
-9. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Until this document is Approved, `feature_implementation_plan` will refuse to proceed.
+9. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Until this document is Approved, `feature_05_implementation_plan` will refuse to proceed.
 
 ---
 
@@ -49,7 +49,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 > Created: {today's date}
 > Project: {project-name}
 > Feature ID: {feature-name}
-> Depends on: technical-design.md, api-spec.md (if required)
+> Depends on: 02_technical_design.md, 03_api_spec.md (if required)
 
 ## Overview
 
@@ -156,7 +156,7 @@ Test boundary conditions, error states, and unexpected inputs.
 |---|---|---|---|---|
 | EC-1 | | | | AC-N |
 
-(Source edge cases from technical-design.md and the acceptance criteria in feature-brief.md.)
+(Source edge cases from 02_technical_design.md and the acceptance criteria in 01_feature_brief.md.)
 
 ## Performance Tests (Tier 3)
 
@@ -180,7 +180,7 @@ A test run is considered passing when:
 2. All end-to-end journeys complete successfully on both happy path and defined variants (if End-to-End is Required)
 3. All edge cases are handled without crashes or data loss
 4. Performance thresholds are met (if applicable)
-5. Every acceptance criterion from feature-brief.md is covered by at least one test with a matching Covers reference
+5. Every acceptance criterion from 01_feature_brief.md is covered by at least one test with a matching Covers reference
 
 ## Open Questions
 
@@ -205,5 +205,5 @@ Before running the next skill, confirm:
 - [ ] **Report format confirmed**
 - [ ] No open questions remain
 
-**Next step:** When approved, run `/feature_implementation_plan {project-name} {feature-name}`
+**Next step:** When approved, run `/feature_05_implementation_plan {project-name} {feature-name}`
 ```

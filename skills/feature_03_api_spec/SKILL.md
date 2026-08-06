@@ -1,6 +1,6 @@
 ---
-name: feature_api_spec
-description: Generate an API & Schema Spec — the fourth step in the feature workflow, run only when technical-design.md declares "API Specification Required: Yes". Defines exact contracts including API endpoints, request/response shapes, database schemas, event schemas, and validation rules.
+name: feature_03_api_spec
+description: Generate an API & Schema Spec — the fourth step in the feature workflow, run only when 02_technical_design.md declares "API Specification Required: Yes". Defines exact contracts including API endpoints, request/response shapes, database schemas, event schemas, and validation rules.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by the feature name in kebab-case.
@@ -8,19 +8,19 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 ## Steps
 
 1. Read the following for context:
-   - `projects/{project-name}/features/{feature-name}/feature-brief.md` (required)
-   - `projects/{project-name}/features/{feature-name}/technical-design.md` (required — do not proceed if missing)
-   - `projects/{project-name}/architecture.md` (if it exists)
+   - `projects/{project-name}/features/{feature-name}/01_feature_brief.md` (required)
+   - `projects/{project-name}/features/{feature-name}/02_technical_design.md` (required — do not proceed if missing)
+   - `projects/{project-name}/02_project_architecture.md` (if it exists)
 
-2. **Review gate:** check `technical-design.md`'s Status. If `Draft`, stop here and tell the user it needs review and approval first. If the user confirms approval in response, update its Status to `Approved`, then continue.
+2. **Review gate:** check `02_technical_design.md`'s Status. If `Draft`, stop here and tell the user it needs review and approval first. If the user confirms approval in response, update its Status to `Approved`, then continue.
 
-3. Check `technical-design.md`'s `API Specification Required` field. If it says `No`, stop and tell the user this skill isn't needed for this feature — go straight to `/feature_test_spec {project-name} {feature-name}`.
+3. Check `02_technical_design.md`'s `API Specification Required` field. If it says `No`, stop and tell the user this skill isn't needed for this feature — go straight to `/feature_04_test_spec {project-name} {feature-name}`.
 
-4. Generate `projects/{project-name}/features/{feature-name}/api-spec.md` using the template below.
+4. Generate `projects/{project-name}/features/{feature-name}/03_api_spec.md` using the template below.
 
 5. After writing the file, present the Review Checklist to the user.
 
-6. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Until this document is Approved (when required), `feature_test_spec` will refuse to proceed.
+6. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Until this document is Approved (when required), `feature_04_test_spec` will refuse to proceed.
 
 ---
 
@@ -33,7 +33,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 > Created: {today's date}
 > Project: {project-name}
 > Feature ID: {feature-name}
-> Depends on: technical-design.md
+> Depends on: 02_technical_design.md
 
 ## Data Models
 
@@ -153,5 +153,5 @@ Before running the next skill, confirm:
 - [ ] Validation rules cover all inputs
 - [ ] No open questions remain
 
-**Next step:** When approved, run `/feature_test_spec {project-name} {feature-name}`
+**Next step:** When approved, run `/feature_04_test_spec {project-name} {feature-name}`
 ```

@@ -134,10 +134,12 @@ If PASS: "All checks pass. Documents are consistent with implementation."
 
 ## Change Propagation Reminder
 
-If inconsistencies are found, remind the user of the correct propagation order:
+If inconsistencies are found between code and documentation, do not assume the documentation should move toward whatever the implementation currently does. Recommend this sequence instead:
 
-```
-feature-brief → technical-design → api-spec → test-spec → implementation-plan → implementation
-```
+1. **Determine the intended behaviour** — what should actually happen, independent of what either the docs or the code currently say.
+2. **Identify the highest authoritative artifact that must change** to reflect that intent (e.g. `feature-brief.md` if an acceptance criterion itself was wrong, `technical-design.md` if the approach was wrong, `api-spec.md` if only a contract detail was wrong).
+3. **Update that artifact first.**
+4. **Propagate the change through downstream documents**, in order: `feature-brief → technical-design → api-spec → test-spec → implementation-plan`.
+5. **Update the implementation last**, to match the now-corrected documents.
 
-Changes should always flow top-down. If a change originates in the implementation (e.g. a bug discovery), update upward first (technical-design → api-spec), then confirm downward (test-spec → implementation-plan → implementation).
+If the approved documents remain correct and only the implementation is wrong, update the code only — do not modify approved documents merely to match an unapproved implementation change. The specification remains the source of truth unless an approved change explicitly changes it. When it's unclear which side is wrong, recommend `issue_capture` to formally investigate rather than resolving the direction here.

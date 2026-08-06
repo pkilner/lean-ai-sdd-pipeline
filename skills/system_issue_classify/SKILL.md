@@ -20,8 +20,9 @@ The arguments passed to this skill are the project name in kebab-case, followed 
    - **Test gap** — existing tests do not cover the reported scenario
    - **Change request** — this is new/changed behaviour being requested, not a report of something wrong
    - **Dependency/environment issue** — caused by an external dependency, infrastructure, or environment configuration, not by this project's code or specs
+   - **Pending Investigation** — there isn't enough evidence in the description alone to confidently choose one of the categories above, even after briefly checking the relevant feature docs and/or application repository
 
-   If genuinely unclear from the description alone, briefly inspect the relevant feature docs and/or application repository before deciding. If still ambiguous, classify as the closest fit and note the ambiguity in `issue.md`.
+   If genuinely unclear from the description alone, briefly inspect the relevant feature docs and/or application repository before deciding. Do not force a best-fit guess when the evidence doesn't support one — set Category to `Pending Investigation` instead. `issue_investigate` determines and records the final category once it has actually investigated. Only use `Pending Investigation` when genuinely warranted; most issues have enough information to classify directly.
 
 3. Update `issue.md`: set `Category` to the chosen value, add a Status History entry.
 

@@ -6,6 +6,92 @@ It is intentionally **not** an enterprise ALM platform. The guiding principle:
 
 > Provide the minimum amount of structure necessary to consistently produce high-quality software.
 
+**How it works, in one paragraph:** Claude runs the skills below to take a project from initialization through feature specification (brief → technical design → API spec → tests → implementation plan) to implementation, and to track issues (defects, drift, change requests) through investigation, resolution, and verification. Claude does the drafting — every document, every classification, every consistency check. You do the reviewing — nothing proceeds past a review gate until you confirm a document, and code is never committed or pushed without you. For the full walkthrough, see [`docs/pipeline-overview.md`](docs/pipeline-overview.md).
+
+```mermaid
+flowchart TD
+    classDef userSkill fill:#cfe2ff,stroke:#2b6cb0,color:#1a365d,stroke-width:1px
+    classDef systemSkill fill:#ffe8cc,stroke:#c05621,color:#652b06,stroke-width:1px,stroke-dasharray: 3 2
+    classDef doc fill:#e6f4ea,stroke:#2f855a,color:#22543d,stroke-width:1px
+    classDef gate fill:#fff0f0,stroke:#c53030,color:#742a2a,stroke-width:1px
+    classDef impl fill:#edf2f7,stroke:#4a5568,color:#1a202c,stroke-width:1px
+    classDef structure fill:#f5f5f5,stroke:#718096,color:#2d3748,stroke-width:1px
+
+    subgraph LEGEND[Legend]
+        direction LR
+        L1[User-facing skill]:::userSkill
+        L2[Internal system skill]:::systemSkill
+        L3[Generated document]:::doc
+        L4{Review gate}:::gate
+        L5[Implementation]:::impl
+    end
+
+    WS[Workspace]:::structure --> PR[Pipeline Repository]:::structure
+    WS --> AR[Application Repository]:::impl
+    PR -->|validated repo_path| AR
+    PR --> PROJS[projects/]:::structure
+
+    subgraph PROJ[Project Workflow]
+        direction TB
+        PI[project_init]:::userSkill --> PY[project.yaml]:::doc
+        PY --> PB[project_brief]:::userSkill --> PBD[project-brief.md - Draft]:::doc
+        PBD --> G1{Approved?}:::gate
+        G1 -->|no, revise| PB
+        G1 -->|yes| PA[project_architecture]:::userSkill
+        PA --> AD[architecture.md - Draft]:::doc --> G2{Approved?}:::gate
+        G2 -->|no, revise| PA
+        G2 -->|yes| ADR1[project_adr - optional]:::userSkill
+        ADR1 --> ADOC1[ADR - Proposed]:::doc
+    end
+    PROJS --> PI
+    G2 -->|yes| FI
+
+    subgraph FEAT[Feature Workflow]
+        direction TB
+        FI[feature_init]:::userSkill --> FB[feature_brief]:::userSkill --> FBD[feature-brief.md - Draft, AC-N]:::doc
+        FBD --> G3{Approved?}:::gate
+        G3 -->|no, revise| FB
+        G3 -->|yes| TD[feature_technical_design]:::userSkill
+        TD --> TDD[technical-design.md - Draft, API Required?]:::doc --> G4{Approved?}:::gate
+        G4 -->|no, revise| TD
+        G4 -->|yes, API required| API[feature_api_spec]:::userSkill
+        G4 -->|yes, not required| TS[feature_test_spec]:::userSkill
+        API --> APID[api-spec.md - Draft]:::doc --> G5{Approved?}:::gate
+        G5 -->|no, revise| API
+        G5 -->|yes| TS
+        TS --> TSD[test-spec.md - Draft, Covers AC-N]:::doc --> G6{Approved?}:::gate
+        G6 -->|no, revise| TS
+        G6 -->|yes| IP[feature_implementation_plan]:::userSkill
+        IP --> IPD[implementation-plan.md - Draft, task Status]:::doc --> G7{Approved?}:::gate
+        G7 -->|no, revise| IP
+        G7 -->|yes| IMPL[Implementation - application repo]:::impl
+        ADR2[feature_adr - optional]:::userSkill --> ADOC2[ADR - Proposed]:::doc
+    end
+
+    IMPL -->|all tasks Complete| CR[system_consistency_review]:::systemSkill
+    CR -->|PASS| VER[Feature Verified]:::doc
+
+    subgraph ISSUE[Issue Workflow]
+        direction TB
+        IC[issue_capture]:::userSkill --> ISD[issue.md]:::doc
+        ISD --> SIC[system_issue_classify]:::systemSkill
+        SIC -->|Category set, or Pending Investigation| ISD
+        SIC --> II[issue_investigate]:::userSkill --> INV[investigation.md]:::doc
+        INV --> IR[issue_resolve]:::userSkill --> RES[resolution.md]:::doc
+        RES --> IV[issue_verify]:::userSkill --> VF[verification.md]:::doc
+    end
+
+    VF --> CR
+
+    %% Feedback loop: a consistency review finding can start a new issue
+    CR -.->|drift found| IC
+
+    %% Feedback loop: an accepted architecture decision propagates down to implementation
+    ADR1 -.->|Accepted| AD
+    AD -.->|layers or decisions updated| TD
+    TD -.->|design updated| IMPL
+```
+
 ## Workspace layout
 
 This pipeline repository and the application(s) it specs live as sibling directories:
@@ -149,7 +235,7 @@ Any skill that touches the application repository (`issue_resolve`, and implemen
 ## Design notes / why it's structured this way
 
 - **One document, one review gate, per step.** No skill can silently build on top of something nobody has actually reviewed.
-- **Change propagation is top-down.** `feature-brief → technical-design → api-spec → test-spec → implementation-plan → implementation`. If a change originates in the implementation (e.g. a bug discovery), update upward first, then confirm downward.
+- **The spec is the source of truth, not the code.** When code and documentation disagree, the fix doesn't default to updating docs to match whatever the implementation did. Determine the intended behaviour, update the highest authoritative artifact first, propagate downstream (`feature-brief → technical-design → api-spec → test-spec → implementation-plan`), and update the implementation last. If the approved documents are still correct, only the code changes.
 - **Tests come before the implementation plan**, and every test traces to an acceptance criterion. "Done" is defined before a single task is written, not inferred afterward.
 - **Status is tracked, not assumed.** A plan existing doesn't mean anything is built; tasks being marked Complete doesn't mean anything is verified. These are different, explicitly tracked states.
 - **Layer names and paths are not hardcoded.** `project_architecture` derives the project's real system layers and where their code actually lives, once, and every other skill pulls from it.

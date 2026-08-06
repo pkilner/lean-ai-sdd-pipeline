@@ -22,9 +22,11 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 5. Generate `projects/{project-name}/issues/{issue-id}/investigation.md` using the template below.
 
-6. Update `issue.md`'s Status History with an "Investigating" or "Investigated" entry.
+6. If `issue.md`'s `Category` is `Pending Investigation`, this investigation has now produced enough evidence to classify it properly — set `Category` to the correct value from the list in `system_issue_classify` before finishing.
 
-7. After writing, present findings and the recommended corrective action to the user.
+7. Update `issue.md`'s Status History with an "Investigating" or "Investigated" entry.
+
+8. After writing, present findings and the recommended corrective action to the user.
 
 ---
 

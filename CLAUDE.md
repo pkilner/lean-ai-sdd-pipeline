@@ -73,5 +73,5 @@ Any time you (Claude) are about to modify files in the application repository (`
 ## Notes
 
 - No skills are copied into application repositories. Everything here operates against `projects/<project-name>/` in this repo, reaching into the application repo only via `repo_path` (validated in `project_init`) for source code inspection.
-- Change propagation is always top-down: `feature-brief → technical-design → api-spec → test-spec → implementation-plan → implementation`. When a change originates downstream (e.g. a bug found in code), update upward first, then confirm downward.
+- The specification is the source of truth unless an approved change explicitly changes it. When code and documentation disagree, determine the intended behaviour first, update the highest authoritative artifact, then propagate downstream (`feature-brief → technical-design → api-spec → test-spec → implementation-plan`), and update the implementation last. Never rewrite approved documents merely to match an unapproved implementation change — if the documents are still correct, fix the code only.
 - Never report a feature as built or verified just because a document exists — check task Status and the `Verified` field, per `system_next_step`.

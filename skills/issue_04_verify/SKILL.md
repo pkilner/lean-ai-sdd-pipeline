@@ -1,6 +1,6 @@
 ---
 name: issue_04_verify
-description: Verify a resolved issue — the fifth and final step in the issue workflow. Confirms the resolution actually fixes the issue, records 04_verification.md, closes it out, and automatically runs a consistency review. Pass the project name and issue ID.
+description: Verify a resolved issue — the final step in the issue workflow. Confirms the resolution actually fixes the issue, records the Verification section of the issue's file, closes it out, and automatically runs a consistency review. Pass the project name and issue ID.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID.
@@ -9,45 +9,36 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 ## Steps
 
-1. Read `{project-root}/issues/{issue-id}/03_resolution.md` (required — do not proceed if missing).
+1. Read `{project-root}/issues/{issue-id}.md` (required — do not proceed if missing or if its Resolution section is still `_Not started._`).
 
-2. Execute the Verification Plan from the resolution: run the relevant tests (see the feature's `04_test_spec.md` if applicable) and/or perform the manual checks it describes.
+2. Execute the verification plan from the Resolution section: run the relevant tests (see the feature's `02_feature_plan.md` if applicable) and perform any other checks it describes.
 
-3. Generate `{project-root}/issues/{issue-id}/04_verification.md` using the template below.
+3. Replace the `_Not started._` placeholder under `## 4. Verification` with the section template below.
 
-4. If verification passes, update `01_issue.md`'s Status to `Closed` and add a Status History entry. If verification fails, update Status back to `Open`, note why in Status History, and tell the user this needs to return to `/issue_02_investigate` or `/issue_03_resolve`.
+4. If verification passes, update the header `Status` to `Closed` and add a Status History row. If it fails, set `Status` back to `Open`, note why in Status History, and tell the user this needs to return to `/issue_02_investigate` or `/issue_03_resolve`.
 
-5. **If the issue is now Closed, automatically invoke `system_consistency_review {project-name} {feature-name}`** for any feature(s) this issue touched (from `Related Features / ADRs`) before ending your turn — do not wait for the user to request it. This confirms the fix didn't leave residual drift. If the issue was project-wide rather than feature-specific, run it without a feature name to check the whole project.
+5. **If the issue is now Closed, automatically invoke `system_consistency_review {project-name} {feature-name}`** for each feature in **Related** before ending your turn — do not wait for the user to request it. This confirms the fix didn't leave residual drift. If the issue was project-wide rather than feature-specific, run it without a feature name.
 
-6. After writing, confirm the outcome to the user, including the consistency review result.
+6. Confirm the outcome to the user, including the consistency review result.
+
+**Keep the status current:** whenever this skill creates its document or changes a Status, finish by running `project_90_status {project-name}` so `STATUS.md` matches before ending your turn.
 
 ---
 
-## Output Template (`04_verification.md`)
+## Section Template (`## 4. Verification`)
 
 ```markdown
-# Verification: {ISSUE-xxxx}
+**Date:** {today's date}
 
-> Date: {today's date}
-> Project: {project-name}
-
-## Verification Steps Performed
+**Steps performed:**
 
 1. ...
-2. ...
 
-## Result
+**Result:** Pass / Fail
 
-Pass / Fail
+**Evidence:** Test output, command results, or observation confirming (or disconfirming) the fix.
 
-## Evidence
-
-Test output, command results, or manual observation confirming (or disconfirming) the fix.
-
-## Outcome
-
-If Pass: Issue is closed.
-If Fail: Explain what still fails and why this returns to investigation or resolution.
+**Outcome:** If Pass, the issue is closed. If Fail, what still fails and why this returns to investigation or resolution.
 ```
 
 **Next step:** consistency review runs automatically once closed. If verification failed, return to `/issue_02_investigate {project-name} {issue-id}`.

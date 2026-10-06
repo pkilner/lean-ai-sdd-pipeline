@@ -17,20 +17,20 @@ The argument is the project name in kebab-case. If omitted, list every project r
    - **Project Defined** — both `01_project_brief.md` and `02_project_architecture.md` exist with `Status: Approved`.
 
 2. List every directory under `{project-root}/features/`. For each, determine state by walking the same logic as `system_next_step`:
-   - **(in definition)** — one or more of 01_feature_brief/02_technical_design/03_api_spec/04_test_spec/05_implementation_plan missing or still `Draft`. Report which document is the blocker.
-   - **Feature Specified** — all required documents `Approved`, all implementation tasks `Not Started`.
+   - **(in definition)** — `01_feature_spec.md` or `02_feature_plan.md` missing or still `Draft`. Report which document is the blocker.
+   - **Feature Specified** — both documents `Approved`, all tasks `Not Started`.
    - **Feature In Progress** — some tasks `In Progress` or `Complete`, not all `Complete`.
    - **Feature Implemented** — all tasks `Complete`, but `Verified: Not yet`.
    - **Feature Verified** — all tasks `Complete` and `Verified` is set (consistency review passed).
 
-   Never report a feature as Implemented or Verified on the strength of `05_implementation_plan.md` existing alone — that only means Specified.
+   Never report a feature as Implemented or Verified on the strength of `02_feature_plan.md` existing alone — that only means Specified.
 
-3. List every directory under `{project-root}/issues/`. For each, read `01_issue.md`'s Status and Category.
+3. List every `ISSUE-xxxx.md` file under `{project-root}/issues/`. For each, read its header: `Status`, `Category`, and `Related`.
 
 4. Deliver a concise briefing covering:
    - **What this project is** (one sentence, from `01_project_brief.md`)
    - **What has been built** — features at Implemented or Verified
-   - **What is currently in progress** — features In Progress or still in definition, and open (non-`Closed`) issues
+   - **What is currently in progress** — features In Progress or still in definition, and open (non-`Closed`) issues, each with the feature it relates to
    - **Open decisions** — from `02_project_architecture.md`'s Open Decisions table
    - **Recommended next action** — invoke the logic in `system_next_step` for the most relevant in-progress feature or issue, or for the project itself if nothing is in progress
 

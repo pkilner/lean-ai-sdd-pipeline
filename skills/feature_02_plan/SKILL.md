@@ -1,0 +1,110 @@
+---
+name: feature_02_plan
+description: Generate a Feature Plan — the third step in the feature workflow. One document listing the tests (each mapped to the AC-N it validates) and the coding tasks that satisfy them, with a Status column for tracking real progress. Tests define "done"; the tasks exist to satisfy them.
+---
+
+The arguments passed to this skill are the project name in kebab-case, followed by the feature name in kebab-case.
+
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+
+## Steps
+
+1. Read the following for context:
+   - `{project-root}/features/{feature-name}/01_feature_spec.md` (required — do not proceed if missing; this is where the AC-N identifiers and the design come from)
+   - `{project-root}/02_project_architecture.md`
+
+2. **Review gate:** check `01_feature_spec.md`'s Status. If `Draft`, stop here and tell the user it needs review and approval first. If the user confirms approval in response, update its Status to `Approved`, add `> Approved: {today's date}` on the line beneath it, then continue.
+
+3. Generate `{project-root}/features/{feature-name}/02_feature_plan.md` using the template below. It always starts `Status: Draft` with no `> Approved:` line.
+
+4. Write the tests first:
+   - Give every test a stable ID: `UT-N` unit, `IT-N` integration, `E2E-N` end-to-end, `EC-N` edge case, `PT-N` performance. Do not renumber once tasks reference them.
+   - Every test states the acceptance criteria it validates in **Covers**, using the `AC-N` identifiers from the spec. A test with no AC to validate may use `—`, as the exception.
+   - Every AC must be covered by at least one test.
+   - Mark each of Unit, Integration, and End-to-End `Required`, `Optional`, or `Not Applicable`, with a one-line reason for anything not `Required`. Do not force coverage that doesn't fit the feature's shape.
+   - Give the command that runs the tests in the application repository — locate it via `repo_path` in the project pointer and that repository's own tooling, or ask the user if none is documented yet.
+
+5. Then write the tasks:
+   - Break the work down to individual coding tasks, not milestones. Each starts `Not Started`.
+   - Every task lists the test IDs it makes possible to write and pass in **Tests Satisfied**. Every test must be satisfied by at least one task; record that task number in the test's **Task** column. A test with no task, or an AC with no test, is a gap to resolve before proceeding.
+   - Add a documentation task wherever a public interface, non-obvious behaviour, configuration, or setup needs explaining, naming what specifically to document.
+
+6. After writing the file, present the Review Checklist to the user.
+
+7. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header, and add `> Approved: {today's date}` on the line beneath it, before ending your turn. Implementation should not begin against a Draft plan.
+
+8. **As implementation happens** (in the application repository, outside `sdd/`), whenever Claude completes work on one of these tasks, update that task's Status before ending the turn (`Not Started` → `In Progress` → `Complete`, or `Blocked` with a one-line reason in Notes). Never mark a task `Complete` without the tests it's responsible for actually existing and passing.
+
+9. **When every task's Status becomes Complete**, automatically invoke `system_consistency_review {project-name} {feature-name}` before telling the user the feature is done, and record the outcome in this document's `Verified` header field. All tasks Complete means **Implemented**, not **Verified**; verification requires a passing consistency review.
+
+**Keep the status current:** whenever this skill creates its document, changes its Status, or the feature becomes Implemented or Verified, finish by running `project_90_status {project-name}` so `STATUS.md` matches before ending your turn.
+
+---
+
+## Output Template
+
+````markdown
+# Feature Plan: {Feature Name}
+
+> Status: Draft
+> Created: {today's date}
+> Project: {project-name}
+> Feature ID: {feature-name}
+> Depends on: 01_feature_spec.md
+> Verified: Not yet
+
+## Test Approach
+
+| Level | Required / Optional / Not Applicable | Reason (if not Required) |
+|---|---|---|
+| Unit | | |
+| Integration | | |
+| End-to-End | | |
+
+**Run command:** the command(s) that run this feature's tests in the application repository, and what a pass looks like (for example, exit code 0).
+
+**Test data:** any data that must exist or be generated.
+
+## Tests
+
+| ID | Level | Test | Expected Result | Covers | Task |
+|---|---|---|---|---|---|
+| UT-1 | Unit | | | AC-1 | 1 |
+| IT-1 | Integration | | | AC-1, AC-2 | 3 |
+| EC-1 | Edge case | | | AC-3 | 2 |
+
+Add detail beneath the table for any test that needs setup or steps explained.
+
+## Tasks
+
+Layer key — one letter per layer this feature touches, from `02_project_architecture.md`.
+
+Tasks are numbered in build order. A task cannot begin until the tasks it depends on are complete.
+
+| # | Task | Layer | Depends On | Tests Satisfied | Status | Notes |
+|---|---|---|---|---|---|---|
+| 1 | | | — | UT-1 | Not Started | |
+| 2 | | | 1 | EC-1 | Not Started | |
+
+Add detail beneath the table for any task that needs more explanation than fits in a row, referencing the relevant part of the spec.
+
+## Open Questions
+
+List any unresolved questions. Leave blank if none.
+
+---
+
+## Review Checklist
+
+Before starting implementation, confirm:
+
+- [ ] Each of Unit / Integration / End-to-End is marked Required, Optional, or Not Applicable, with a reason for anything not Required
+- [ ] Every acceptance criterion in the spec is covered by at least one test
+- [ ] Every test has a stable ID, a Covers reference, and a task that satisfies it
+- [ ] Every edge case in the spec has a test
+- [ ] Every task is an individual coding task, in a workable build order, with a Status of Not Started
+- [ ] All design and contract work in the spec has a corresponding task
+- [ ] The run command is specified and matches the application repository's tooling
+
+**Next step:** When approved, begin implementation in the application repository. Update each task's Status as you go. When all tasks reach Complete, this skill automatically runs `system_consistency_review` before the feature is reported as done.
+````

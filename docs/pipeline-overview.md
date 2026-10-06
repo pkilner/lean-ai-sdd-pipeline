@@ -21,8 +21,8 @@ lean-ai-sdd-pipeline/
 
 <application-repository>/sdd/
 ├── project.yaml, 01_project_brief.md, 02_project_architecture.md, adr/
-├── features/<feature-name>/{...}
-└── issues/ISSUE-xxxx/{...}
+├── features/<feature-name>/{01_feature_spec.md, 02_feature_plan.md, adr/}
+└── issues/ISSUE-xxxx.md
 ```
 
 ## Project Hierarchy
@@ -37,11 +37,11 @@ A feature is a bounded, testable delivery increment. It may span several capabil
 
 ## Feature Hierarchy
 
-Each feature under a project walks: `feature_00_init → feature_01_brief → feature_02_technical_design → feature_03_api_spec (only if required) → feature_04_test_spec → feature_05_implementation_plan → implementation`. Tests are specified *before* the implementation plan — the plan exists to satisfy the tests, not the other way around. `feature_adr` records feature-level decisions as needed. `feature_90_status` can be run anytime for a display-only health/state summary.
+Each feature under a project walks: `feature_00_init → feature_01_spec → feature_02_plan → implementation`. The spec says what is being built and how; the plan lists the tests and then the tasks that satisfy them — tests are written *before* tasks, not the other way around. `feature_adr` records feature-level decisions as needed. `feature_90_status` can be run anytime for a display-only health/state summary.
 
 ## Issue Hierarchy
 
-Issues are siblings of features, not nested beneath them, since one issue can span several. Every issue always produces all four files — `01_issue.md`, `02_investigation.md`, `03_resolution.md`, `04_verification.md` — regardless of size. Classification (`system_issue_classify`) assigns a category; when the evidence genuinely isn't there yet, it may leave `Category: Pending Investigation` rather than force a guess, and `issue_02_investigate` settles it once it has actually dug in. `issue_90_status` can be run anytime — pass an issue ID for that issue's stage, or omit it for a project-wide Open/Investigating/Resolved/Closed count.
+Issues are siblings of features, not nested beneath them, since one issue can span several. Every issue is a single file, `issues/ISSUE-xxxx.md`, with four sections — Issue, Investigation, Resolution, Verification — filled in as it moves through the workflow, and a header recording its Status, Category, and the features, acceptance criteria, and ADRs it relates to. Classification (`system_issue_classify`) assigns a category; when the evidence genuinely isn't there yet, it may leave `Category: Pending Investigation` rather than force a guess, and `issue_02_investigate` settles it once it has actually dug in. `issue_90_status` can be run anytime — pass an issue ID for that issue's stage, or omit it for a project-wide count and a per-feature listing.
 
 ## Status Skills
 
@@ -49,7 +49,7 @@ Issues are siblings of features, not nested beneath them, since one issue can sp
 
 ## System Skills
 
-`system_*` skills are never invoked directly by a user — only by other skills or by Claude. They are marked `user-invocable: false` and handle orchestration: `system_issue_classify` (inside `issue_01_capture`), `system_consistency_review` (inside `feature_05_implementation_plan` on completion and `issue_04_verify` on closure), and `system_next_step` / `system_workflow_resume` (Claude, at session start or when asked to re-orient).
+`system_*` skills are never invoked directly by a user — only by other skills or by Claude. They are marked `user-invocable: false` and handle orchestration: `system_issue_classify` (inside `issue_01_capture`), `system_consistency_review` (inside `feature_02_plan` on completion and `issue_04_verify` on closure), and `system_next_step` / `system_workflow_resume` (Claude, at session start or when asked to re-orient).
 
 ## Review Gates
 
@@ -73,7 +73,7 @@ ADRs exist at both the project level (`project_adr`) and feature level (`feature
 
 ## Workflow State
 
-A document existing doesn't mean it's approved; an implementation plan existing doesn't mean the feature is built. States are tracked explicitly:
+A document existing doesn't mean it's approved; a feature plan existing doesn't mean the feature is built. States are tracked explicitly:
 
 - **Project:** Initialized → Defined (both `01_project_brief.md` and `02_project_architecture.md` Approved)
 - **Feature:** Specified (all docs Approved, all tasks Not Started) → In Progress (some tasks In Progress/Complete) → Implemented (all tasks Complete) → Verified (Implemented + a passing `system_consistency_review`)
@@ -124,23 +124,13 @@ flowchart TD
 
     subgraph FEAT[Feature Workflow]
         direction TB
-        FI[feature_00_init]:::userSkill --> FB[feature_01_brief]:::userSkill --> FBD[01_feature_brief.md - Draft, AC-N]:::doc
-        FBD --> G3{Approved?}:::gate
-        G3 -->|no, revise| FB
-        G3 -->|yes| TD[feature_02_technical_design]:::userSkill
-        TD --> TDD[02_technical_design.md - Draft, API Required?]:::doc --> G4{Approved?}:::gate
-        G4 -->|no, revise| TD
-        G4 -->|yes, API required| API[feature_03_api_spec]:::userSkill
-        G4 -->|yes, not required| TS[feature_04_test_spec]:::userSkill
-        API --> APID[03_api_spec.md - Draft]:::doc --> G5{Approved?}:::gate
-        G5 -->|no, revise| API
-        G5 -->|yes| TS
-        TS --> TSD[04_test_spec.md - Draft, Covers AC-N]:::doc --> G6{Approved?}:::gate
-        G6 -->|no, revise| TS
-        G6 -->|yes| IP[feature_05_implementation_plan]:::userSkill
-        IP --> IPD[05_implementation_plan.md - Draft, task Status]:::doc --> G7{Approved?}:::gate
-        G7 -->|no, revise| IP
-        G7 -->|yes| IMPL[Implementation - application repo]:::impl
+        FI[feature_00_init]:::userSkill --> FS[feature_01_spec]:::userSkill --> FSD[01_feature_spec.md - Draft, AC-N and design]:::doc
+        FSD --> G3{Approved?}:::gate
+        G3 -->|no, revise| FS
+        G3 -->|yes| FP[feature_02_plan]:::userSkill
+        FP --> FPD[02_feature_plan.md - Draft, tests and tasks]:::doc --> G4{Approved?}:::gate
+        G4 -->|no, revise| FP
+        G4 -->|yes| IMPL[Implementation - application repo]:::impl
         ADR2[feature_adr - optional]:::userSkill --> ADOC2[ADR - Proposed]:::doc
     end
 
@@ -149,12 +139,11 @@ flowchart TD
 
     subgraph ISSUE[Issue Workflow]
         direction TB
-        IC[issue_01_capture]:::userSkill --> ISD[01_issue.md]:::doc
+        IC[issue_01_capture]:::userSkill --> ISD[ISSUE-xxxx.md - one file per issue]:::doc
         ISD --> SIC[system_issue_classify]:::systemSkill
         SIC -->|Category set, or Pending Investigation| ISD
-        SIC --> II[issue_02_investigate]:::userSkill --> INV[02_investigation.md]:::doc
-        INV --> IR[issue_03_resolve]:::userSkill --> RES[03_resolution.md]:::doc
-        RES --> IV[issue_04_verify]:::userSkill --> VF[04_verification.md]:::doc
+        SIC --> II[issue_02_investigate]:::userSkill --> IR[issue_03_resolve]:::userSkill --> IV[issue_04_verify]:::userSkill
+        IV --> VF[Issue Closed]:::doc
     end
 
     VF --> CR
@@ -164,6 +153,6 @@ flowchart TD
 
     %% Feedback loop: an accepted architecture decision propagates down to implementation
     ADR1 -.->|Accepted| AD
-    AD -.->|layers or decisions updated| TD
-    TD -.->|design updated| IMPL
+    AD -.->|layers or decisions updated| FS
+    FS -.->|design updated| IMPL
 ```

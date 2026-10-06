@@ -72,3 +72,16 @@ Every artifact the skills generate — `project.yaml`, `01_project_brief.md`, `0
 - `.claude/skills` is a symlink to `skills/`, so Claude Code discovers the skills when run from this repo.
 
 Reason: specs are versioned and access-controlled with the code they describe, so a private application's specs stay private while this pipeline repo is shared. Skills are still never copied into application repositories.
+
+## Later change: lighter feature and issue documents
+
+Supersedes change #4 above and the vNext spec's five-step feature workflow and four-file issue layout.
+
+- **Features: five documents became two.** `01_feature_spec.md` (skill `feature_01_spec`) holds what and how — acceptance criteria, design by layer, and data/API/validation contracts where the feature changes them. It replaces the feature brief, technical design, and API spec. `02_feature_plan.md` (skill `feature_02_plan`) holds the tests and then the tasks. It replaces the test spec and implementation plan. Review gates dropped from five to two.
+- **Tests still come before tasks,** inside the plan. Each test's `Covers` names its `AC-N` and its `Task` names the task that satisfies it, so the separate Test Coverage Map is gone.
+- **Issues: four files became one.** Each issue is `issues/ISSUE-xxxx.md` with Issue, Investigation, Resolution, and Verification sections filled in by the same four skills. Its header `Status` (`Open`, `Investigated`, `Resolved`, `Closed`) drives the workflow, and its `Related` field links it to features, acceptance criteria, and ADRs.
+- **Removed from templates:** the `API Specification Required` flag, the test tier model including manual field tests, offline and sync sections, milestones, and mandatory per-phase documentation tasks.
+
+Unchanged: stable `AC-N` and test IDs, task Status tracking, the Implemented/Verified distinction, the consistency review, issue classification, and the Reconciliation model.
+
+Reason: fewer documents and approvals per feature, while keeping the traceability that issue tracking depends on.

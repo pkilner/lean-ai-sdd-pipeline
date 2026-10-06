@@ -23,8 +23,8 @@ The argument is the project name in kebab-case.
 5. Build the document inventory — one row for every document the workflow defines, whether or not it exists yet, so the reader can see where work stopped:
    - **Project documents:** `01_project_brief.md` and `02_project_architecture.md`, each `Approved`, `Draft`, or `Not created`.
    - **ADRs:** every file in `{project-root}/adr/`, each `Proposed` or `Accepted`.
-   - **Per feature** under `{project-root}/features/`: all five documents in workflow order, each `Approved`, `Draft`, or `Not created`; `03_api_spec.md` is `Not required` when `02_technical_design.md` says so. For `05_implementation_plan.md`, add the task counts and the `Verified` field. Include the feature's own ADRs.
-   - **Per issue** under `{project-root}/issues/`: all four documents, each `Present` or `Not created`.
+   - **Per feature** under `{project-root}/features/`: both documents in workflow order, each `Approved`, `Draft`, or `Not created`. For `02_feature_plan.md`, add the task counts and the `Verified` field. Include the feature's own ADRs, and the IDs of any open issues whose `Related` names the feature.
+   - **Issues:** every `ISSUE-xxxx.md` under `{project-root}/issues/`, with its `Status`, `Category`, and `Related`.
    - **Planned features:** if `01_project_brief.md` lists planned features (for example a Delivery Sequence table) that have no directory yet, list each as `Not started`.
 
 6. Fill in the **Approved** column for every row:
@@ -37,8 +37,9 @@ The argument is the project name in kebab-case.
    - `Proposed` ADR → `Review and accept`
    - The first `Not created` document in a workflow → the command that creates it
    - A later `Not created` document → `Waiting on step {N}`
-   - Approved implementation plan with tasks remaining → `Implement — {N} tasks remaining`
+   - Approved feature plan with tasks remaining → `Implement — {N} tasks remaining`
    - All tasks Complete but not Verified → `Consistency review`
+   - An issue → the command for its next workflow step; `Closed` → `—`
    - Nothing needed → `—`
 
 8. Present the report directly in your response, in the format below.
@@ -57,7 +58,7 @@ Paths in the Location column are relative to `{project-root}` and written as Mar
 > Generated: {date and time of this run}
 > Project: {project-name}
 
-This file is a snapshot written by `project_90_status`. It is only as current as its Generated time. Each document's own Status field and each implementation plan's task table remain the source of truth.
+This file is a snapshot written by `project_90_status`. It is only as current as its Generated time. Each document's own Status field and each feature plan's task table remain the source of truth.
 
 **Pick up here:** {command from system_next_step} — {one sentence of why}
 
@@ -84,26 +85,18 @@ This file is a snapshot written by `project_90_status`. It is only as current as
 
 | Step | Document | Location | Status | Approved | Next action |
 |---|---|---|---|---|---|
-| 1 | Feature Brief | [features/{feature-name}/01_feature_brief.md](features/{feature-name}/01_feature_brief.md) | {Approved / Draft / Not created} | {date / —} | {action / —} |
-| 2 | Technical Design | features/{feature-name}/02_technical_design.md | {Approved / Draft / Not created} | {date / —} | {action / —} |
-| 3 | API Spec | features/{feature-name}/03_api_spec.md | {Approved / Draft / Not created / Not required} | {date / —} | {action / —} |
-| 4 | Test Spec | features/{feature-name}/04_test_spec.md | {Approved / Draft / Not created} | {date / —} | {action / —} |
-| 5 | Implementation Plan | features/{feature-name}/05_implementation_plan.md | {Approved / Draft / Not created} — {X}/{Y} tasks Complete; Verified: {value} | {date / —} | {action / —} |
+| 1 | Feature Spec | [features/{feature-name}/01_feature_spec.md](features/{feature-name}/01_feature_spec.md) | {Approved / Draft / Not created} | {date / —} | {action / —} |
+| 2 | Feature Plan | features/{feature-name}/02_feature_plan.md | {Approved / Draft / Not created} — {X}/{Y} tasks Complete; Verified: {value} | {date / —} | {action / —} |
+
+Open issues: {issue-id, issue-id — or "none"}
 
 (Repeat per feature, in the order they were created. For a planned feature with no directory, give a heading `### {feature-name} — Not started` and one row whose Next action is the `/feature_00_init` command, or `Waiting on {earlier feature}` when it depends on one that is not finished.)
 
 ## Issues
 
-### {issue-id} — {Status} — {Category}
-
-| Step | Document | Location | Status | Next action |
-|---|---|---|---|---|
-| 1 | Issue | issues/{issue-id}/01_issue.md | {Present / Not created} | {action / —} |
-| 2 | Investigation | issues/{issue-id}/02_investigation.md | {Present / Not created} | {action / —} |
-| 3 | Resolution | issues/{issue-id}/03_resolution.md | {Present / Not created} | {action / —} |
-| 4 | Verification | issues/{issue-id}/04_verification.md | {Present / Not created} — Result: {Pass / Fail} | {action / —} |
-
-(Repeat per issue. Issue documents have no approval step, so there is no Approved column.)
+| Issue | Location | Status | Category | Related | Next action |
+|---|---|---|---|---|---|
+| {issue-id}: {title} | [issues/{issue-id}.md](issues/{issue-id}.md) | {Open / Investigated / Resolved / Closed} | {category} | {features, acceptance criteria, ADRs} | {action / —} |
 
 ## Consistency Findings
 

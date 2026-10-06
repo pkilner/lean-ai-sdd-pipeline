@@ -45,11 +45,8 @@ Run in order for each feature. Each step is gated on the previous document being
 | Command | Step | Purpose |
 |---|---|---|
 | `/feature_00_init <project-name> <feature-name>` | 1 | Create the feature's directory (requires project docs Approved) |
-| `/feature_01_brief <project-name> <feature-name>` | 2 | What to build — writes stable `AC-N` acceptance criteria |
-| `/feature_02_technical_design <project-name> <feature-name>` | 3 | How to build it — declares `API Specification Required: Yes/No` |
-| `/feature_03_api_spec <project-name> <feature-name>` | 4, only if required | Exact contracts |
-| `/feature_04_test_spec <project-name> <feature-name>` | 5 | Tests, each mapped to the `AC-N` it covers — defines "done" |
-| `/feature_05_implementation_plan <project-name> <feature-name>` | 6 | Coding tasks with a real Status column and Tests Satisfied mapping |
+| `/feature_01_spec <project-name> <feature-name>` | 2 | What to build and how — stable `AC-N` acceptance criteria, design, and contracts |
+| `/feature_02_plan <project-name> <feature-name>` | 3 | Tests mapped to the `AC-N` they cover, then coding tasks with a real Status column |
 | `/feature_adr <project-name> <feature-name> <decision-title>` | as needed | Record a feature-level decision (starts `Proposed`) |
 | `/feature_90_status <project-name> <feature-name>` | anytime | Display-only status: health, current state, document/task/test summary, recommended next step |
 
@@ -59,13 +56,13 @@ Issues are siblings of features, not nested beneath them.
 
 | Command | Step | Purpose |
 |---|---|---|
-| `/issue_01_capture <project-name> "<description>"` | 1 | `01_issue.md` — classification happens automatically as part of this |
-| `/issue_02_investigate <project-name> <issue-id>` | 2 | `02_investigation.md` — root cause + reconciliation classification |
-| `/issue_03_resolve <project-name> <issue-id>` | 3 | `03_resolution.md` — apply the fix — never auto-committed or pushed |
-| `/issue_04_verify <project-name> <issue-id>` | 4 | `04_verification.md` — confirm the fix, close the issue — automatically runs a consistency review |
+| `/issue_01_capture <project-name> "<description>"` | 1 | Creates `issues/ISSUE-xxxx.md` — classification happens automatically as part of this |
+| `/issue_02_investigate <project-name> <issue-id>` | 2 | Fills the Investigation section — root cause + reconciliation classification |
+| `/issue_03_resolve <project-name> <issue-id>` | 3 | Fills the Resolution section — apply the fix — never auto-committed or pushed |
+| `/issue_04_verify <project-name> <issue-id>` | 4 | Fills the Verification section — confirm the fix, close the issue — automatically runs a consistency review |
 | `/issue_90_status <project-name> [issue-id]` | anytime | Display-only status: single issue's stage/status, or a project-wide Open/Investigating/Resolved/Closed count |
 
-Every issue always produces all four files (`01_issue.md`, `02_investigation.md`, `03_resolution.md`, `04_verification.md`), regardless of size. Classification assigns a category only; it does not change which files get created.
+Every issue is one file, `issues/ISSUE-xxxx.md`, with four sections filled in as it progresses. Its header's `Related` field links it to features, acceptance criteria (`{feature-name} AC-N`), and ADRs. Classification assigns a category only.
 
 ### Internal orchestration (`system_*`) — never user-facing
 
@@ -74,13 +71,13 @@ Do not tell the user to run these as commands. Invoke them yourself, at the poin
 | Skill | Invoked by |
 |---|---|
 | `system_issue_classify` | `issue_01_capture`, automatically |
-| `system_consistency_review` | `feature_05_implementation_plan` (once all tasks Complete), `issue_04_verify` (on issue closure), or Claude directly when asked to check consistency |
+| `system_consistency_review` | `feature_02_plan` (once all tasks Complete), `issue_04_verify` (on issue closure), or Claude directly when asked to check consistency |
 | `system_next_step` | Claude, when it needs to determine what comes next and a skill's own stated next step isn't enough |
 | `system_workflow_resume` | Claude, at session start or when asked to re-orient |
 
 ## Operational Safety
 
-Any time you (Claude) are about to modify application code — files in the application repository (`repo_path`) outside `sdd/` — whether via `issue_03_resolve` or while implementing a task from `05_implementation_plan.md`:
+Any time you (Claude) are about to modify application code — files in the application repository (`repo_path`) outside `sdd/` — whether via `issue_03_resolve` or while implementing a task from `02_feature_plan.md`:
 
 - Re-validate `repo_path` resolves to a real git repository before editing.
 - Run `git -C {repo_path} status` first. If there's unrelated uncommitted work, tell the user and confirm before editing over it.
@@ -91,5 +88,6 @@ Any time you (Claude) are about to modify application code — files in the appl
 ## Notes
 
 - No skills are copied into application repositories. Skills run from this repo and reach the application repo via `repo_path` (validated in `project_00_init`) — to read and write artifacts under `sdd/`, and to inspect source code.
-- The specification is the source of truth unless an approved change explicitly changes it. When code and documentation disagree, determine the intended behaviour first, update the highest authoritative artifact, then propagate downstream (`01_feature_brief → 02_technical_design → 03_api_spec → 04_test_spec → 05_implementation_plan`), and update the implementation last. Never rewrite approved documents merely to match an unapproved implementation change — if the documents are still correct, fix the code only.
+- The specification is the source of truth unless an approved change explicitly changes it. When code and documentation disagree, determine the intended behaviour first, update the highest authoritative artifact, then propagate downstream (`01_feature_spec → 02_feature_plan`), and update the implementation last. Never rewrite approved documents merely to match an unapproved implementation change — if the documents are still correct, fix the code only.
+- Keep `STATUS.md` current. Whenever a document is created, approved, accepted, or returned to Draft, or an issue changes status, run `project_90_status` before ending the turn so the snapshot matches. The skills that write documents say this too; it also applies when you change a status outside a skill.
 - Never report a feature as built or verified just because a document exists — check task Status and the `Verified` field, per `system_next_step`.

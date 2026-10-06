@@ -20,7 +20,7 @@ The arguments are the project name in kebab-case, followed by the feature name i
    - `PASS WITH WARNINGS` → 🟡 Attention Required
    - `FAIL` → 🔴 Blocked
 
-5. Read `05_implementation_plan.md` (if it exists) to summarize task Status counts, and `04_test_spec.md` (if it exists) for the test-level Required/Optional/Not Applicable declarations and test count.
+5. Read `02_feature_plan.md` (if it exists) to summarize task Status counts, the test count, and the Required/Optional/Not Applicable declaration for each test level.
 
 6. Present the summary directly in your response, in the format below. **Do not write this to a file.** **Do not modify** any document or code file.
 
@@ -35,11 +35,8 @@ Feature Health: {🟢 Healthy / 🟡 Attention Required / 🔴 Blocked}
 Current State: {in definition (blocked on X) / Feature Specified / Feature In Progress / Feature Implemented / Feature Verified}
 
 Documents:
-- 01_feature_brief.md:        {Draft / Approved / missing}
-- 02_technical_design.md:     {Draft / Approved / missing}
-- 03_api_spec.md:             {Draft / Approved / missing / Not Required}
-- 04_test_spec.md:            {Draft / Approved / missing}
-- 05_implementation_plan.md:  {Draft / Approved / missing}
+- 01_feature_spec.md:  {Draft / Approved on {date} / missing}
+- 02_feature_plan.md:  {Draft / Approved on {date} / missing}
 
 Tasks: {X}/{Y} Complete, {Z} In Progress, {W} Blocked, {V} Not Started
 

@@ -25,18 +25,11 @@ repo_path: ../my-app
     ├── adr/
     ├── features/
     │   └── <feature-name>/
-    │       ├── 01_feature_brief.md
-    │       ├── 02_technical_design.md
-    │       ├── 03_api_spec.md
-    │       ├── 04_test_spec.md
-    │       ├── 05_implementation_plan.md
+    │       ├── 01_feature_spec.md
+    │       ├── 02_feature_plan.md
     │       └── adr/
     └── issues/
-        └── ISSUE-xxxx/
-            ├── 01_issue.md
-            ├── 02_investigation.md
-            ├── 03_resolution.md
-            └── 04_verification.md
+        └── ISSUE-xxxx.md
 ```
 
 Pointers are gitignored: they hold machine-specific paths, and keeping them out of history means nothing about a project is committed to this repo. See the root `README.md` for the full workflow (project → feature → issue) and how these documents relate to each other.

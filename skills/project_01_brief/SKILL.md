@@ -27,6 +27,8 @@ A feature is a bounded, testable delivery increment. It may span several capabil
 
 6. **Review gate:** if the user confirms the checklist is satisfied (in this turn or a follow-up), update `Status: Draft` to `Status: Approved` in the document header, and add `> Approved: {today's date}` on the line beneath it, before ending your turn. Do not change the status without explicit user confirmation. Until this document is Approved, `project_02_architecture` and `feature_00_init` will refuse to proceed.
 
+**Keep the status current:** whenever this skill creates its document or changes a Status, finish by running `project_90_status {project-name}` so `STATUS.md` matches before ending your turn.
+
 ---
 
 ## Output Template

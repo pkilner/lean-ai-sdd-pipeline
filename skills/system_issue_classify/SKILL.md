@@ -1,6 +1,6 @@
 ---
 name: system_issue_classify
-description: (Internal — not for direct user invocation.) Classify a captured issue's category. Second step in the issue workflow; invoked automatically by issue_01_capture. Invoked by Claude or other skills only.
+description: (Internal — not for direct user invocation.) Classify a captured issue's category. Invoked automatically by issue_01_capture. Invoked by Claude or other skills only.
 user-invocable: false
 ---
 
@@ -12,7 +12,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 ## Steps
 
-1. Read `{project-root}/issues/{issue-id}/01_issue.md` (required — do not proceed if missing).
+1. Read `{project-root}/issues/{issue-id}.md` (required — do not proceed if missing).
 
 2. Based on the Description and (if present) Steps to Reproduce, assign exactly one **Category**:
    - **Defect** — the implementation does something wrong relative to the agreed spec
@@ -26,7 +26,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
    If genuinely unclear from the description alone, briefly inspect the relevant feature docs and/or application repository before deciding. Do not force a best-fit guess when the evidence doesn't support one — set Category to `Pending Investigation` instead. `issue_02_investigate` determines and records the final category once it has actually investigated. Only use `Pending Investigation` when genuinely warranted; most issues have enough information to classify directly.
 
-3. Update `01_issue.md`: set `Category` to the chosen value, add a Status History entry.
+3. Update the issue file's header: set `Category` to the chosen value, and add a Status History row.
 
 4. Report the classification and reasoning to whichever skill or user turn invoked this.
 

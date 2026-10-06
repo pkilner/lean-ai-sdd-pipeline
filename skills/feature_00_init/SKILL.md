@@ -30,4 +30,6 @@ A feature is a bounded, testable delivery increment. It may span several capabil
 
 5. Confirm creation to the user and recommend the next step.
 
-**Next step:** Run `/feature_01_brief {project-name} {feature-name}`.
+**Keep the status current:** whenever this skill creates its document or changes a Status, finish by running `project_90_status {project-name}` so `STATUS.md` matches before ending your turn.
+
+**Next step:** Run `/feature_01_spec {project-name} {feature-name}`.

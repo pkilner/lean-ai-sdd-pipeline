@@ -1,6 +1,6 @@
 ---
 name: issue_01_capture
-description: Capture a new issue — the first step in the issue workflow. Creates sdd/issues/ISSUE-xxxx/ in the project's application repository with an 01_issue.md describing what was observed, then automatically classifies it. Issues are siblings of features, not nested beneath them.
+description: Capture a new issue — the first step in the issue workflow. Creates sdd/issues/ISSUE-xxxx.md in the project's application repository describing what was observed, then automatically classifies it. One file holds the issue's whole lifecycle. Issues are siblings of features, not nested beneath them.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by a short free-text description of what was observed (e.g. `my-app "sync fails silently when offline for more than 24h"`).
@@ -11,48 +11,54 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 1. Read `{project-root}/project.yaml` (required — do not proceed if the project has not been initialized).
 
-2. Scan `{project-root}/issues/` for existing `ISSUE-xxxx` directories to determine the next number, zero-padded to 4 digits (e.g. if `ISSUE-0007` exists, next is `ISSUE-0008`; if none exist, start at `ISSUE-0001`).
+2. Scan `{project-root}/issues/` for existing `ISSUE-xxxx.md` files to determine the next number, zero-padded to 4 digits (e.g. if `ISSUE-0007.md` exists, next is `ISSUE-0008`; if none exist, start at `ISSUE-0001`). Create `{project-root}/issues/` if it does not exist.
 
-3. Create `{project-root}/issues/ISSUE-{xxxx}/`.
+3. Generate `{project-root}/issues/ISSUE-{xxxx}.md` using the template below. Sections 2–4 stay as `_Not started._` — `issue_02_investigate`, `issue_03_resolve`, and `issue_04_verify` each fill in their own section of this same file.
 
-4. Generate `01_issue.md` using the template below.
+4. Fill in **Related** with any features, acceptance criteria (`{feature-name} AC-N`), or ADRs the issue clearly points at. Leave it blank if unknown — investigation completes it.
 
-5. **Automatically invoke `system_issue_classify {project-name} {issue-id}`** before ending your turn — do not wait for the user to request it. This is an internal orchestration step, not something the user needs to trigger. Present the resulting Category to the user alongside the captured issue.
+5. **Automatically invoke `system_issue_classify {project-name} {issue-id}`** before ending your turn — do not wait for the user to request it. Present the resulting Category to the user alongside the captured issue.
+
+**Keep the status current:** whenever this skill creates its document or changes a Status, finish by running `project_90_status {project-name}` so `STATUS.md` matches before ending your turn.
 
 ---
 
 ## Output Template
 
 ```markdown
-# Issue {ISSUE-xxxx}: {Short Title}
+# {ISSUE-xxxx}: {Short Title}
 
 > Status: Open
 > Category: Pending classification
 > Created: {today's date}
 > Project: {project-name}
 > Reported by: {user, if known}
+> Related: {features, acceptance criteria, ADRs — or blank}
 
-## Description
+## 1. Issue
 
-What was observed, in the reporter's own words.
+**Description:** What was observed, in the reporter's own words.
 
-## Steps to Reproduce
-
-(Only if applicable — omit for change requests or non-reproducible issues)
+**Steps to reproduce:** (omit for change requests or non-reproducible issues)
 
 1. ...
-2. ...
 
 **Expected:** What should have happened.
 **Actual:** What actually happened.
 
-## Related Features / ADRs
+**Impact / Severity:** Who or what is affected, and how badly, if known.
 
-List any features (`features/{feature-name}/`) or ADRs this issue appears to relate to. Leave blank if unknown — this will be filled in during investigation.
+## 2. Investigation
 
-## Impact / Severity
+_Not started._
 
-If known: who/what is affected, and how badly.
+## 3. Resolution
+
+_Not started._
+
+## 4. Verification
+
+_Not started._
 
 ## Status History
 

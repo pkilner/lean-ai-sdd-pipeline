@@ -19,6 +19,8 @@ The arguments passed to this skill are the project name in kebab-case, the featu
 
 5. After writing the file, confirm to the user where it was saved and that it is `Proposed`, not yet binding. If the user confirms acceptance in response, update the Status to `Accepted` and add a Status History row — do not do this automatically.
 
+**Keep the status current:** whenever this skill creates its document or changes a Status, finish by running `project_90_status {project-name}` so `STATUS.md` matches before ending your turn.
+
 ---
 
 ## Output Template

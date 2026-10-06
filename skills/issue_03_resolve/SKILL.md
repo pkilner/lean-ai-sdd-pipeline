@@ -1,6 +1,6 @@
 ---
 name: issue_03_resolve
-description: Resolve an investigated issue — the fourth step in the issue workflow. Applies the recommended corrective action (spec update, code fix, or both) and records what changed in 03_resolution.md. Pass the project name and issue ID.
+description: Resolve an investigated issue — the third user step in the issue workflow. Applies the recommended corrective action (spec update, code fix, or both) and records what changed in the Resolution section of the issue's file. Pass the project name and issue ID.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID.
@@ -9,7 +9,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 ## Steps
 
-1. Read `{project-root}/issues/{issue-id}/02_investigation.md` (required — do not proceed if missing).
+1. Read `{project-root}/issues/{issue-id}.md` (required — do not proceed if missing or if its Investigation section is still `_Not started._`).
 
 2. **Before touching the application repository:**
    - Re-confirm `repo_path` from the project pointer resolves to a real git repository (per the checks in `project_00_init` — do not assume it still holds).
@@ -17,54 +17,45 @@ The arguments passed to this skill are the project name in kebab-case, followed 
    - Only touch files required to implement the recommended corrective action — do not opportunistically refactor or "clean up" nearby code.
 
 3. Apply the recommended corrective action from the investigation:
-   - If it requires a spec update, update the relevant document(s) under `{project-root}/features/{feature-name}/` (or `02_project_architecture.md` / `01_project_brief.md` for project-wide issues) and follow the standard top-down propagation order (01_feature_brief → 02_technical_design → 03_api_spec → 04_test_spec → 05_implementation_plan).
+   - If it requires a spec update, update the relevant document(s) under `{project-root}/features/{feature-name}/` (or `02_project_architecture.md` / `01_project_brief.md` for project-wide issues), in the order `01_feature_spec → 02_feature_plan`.
    - If it requires a code fix, implement it in the application repository.
    - If it requires both, do the spec update first, then the code fix, so the code is brought into line with an already-corrected spec.
    - **Never run `git commit` or `git push` in the application repository as part of this skill.** Leave changes staged/unstaged for the user to review and commit themselves — this includes the spec updates, which live in the same repository under `sdd/`.
 
-4. Generate `{project-root}/issues/{issue-id}/03_resolution.md` using the template below.
+4. Replace the `_Not started._` placeholder under `## 3. Resolution` with the section template below, listing every document and file actually changed.
 
-5. List every document and file actually changed, including files in the application repository — this list is both part of the output document and something you state plainly to the user.
+5. Update the header `Status` to `Resolved` and add a Status History row.
 
-6. Update `01_issue.md`'s Status to `Resolved` and add a Status History entry.
+6. Tell the user plainly what was changed (spec files and/or application files) and recommend the next step.
 
-7. After writing, confirm to the user what was changed (spec files and/or application files) and recommend the next step.
+**Keep the status current:** whenever this skill creates its document or changes a Status, finish by running `project_90_status {project-name}` so `STATUS.md` matches before ending your turn.
 
 ---
 
-## Output Template (`03_resolution.md`)
+## Section Template (`## 3. Resolution`)
 
 ```markdown
-# Resolution: {ISSUE-xxxx}
+**Date:** {today's date}
 
-> Date: {today's date}
-> Project: {project-name}
+**Summary:** One or two sentences describing what was done.
 
-## Summary
-
-One or two sentences describing what was done to resolve the issue.
-
-## Changes Made
-
-### Specification Changes
+**Specification changes**
 
 | Document | Change |
 |---|---|
-| (e.g.) features/{feature}/03_api_spec.md | Corrected field name from X to Y |
+| (e.g.) features/{feature}/01_feature_spec.md | Corrected field name from X to Y |
 
-(Leave the table with "None" if no spec changes were needed.)
+(Write "None" if no spec changes were needed.)
 
-### Code Changes
+**Code changes** (not committed or pushed — left for the user to review)
 
 | File (in application repo) | Change |
 |---|---|
-| (e.g.) src/api/routes.ts | Fixed validation to match 03_api_spec.md |
+| (e.g.) src/api/routes.ts | Fixed validation to match the spec |
 
-(Leave the table with "None" if no code changes were needed. Not committed or pushed — left for the user to review.)
+(Write "None" if no code changes were needed.)
 
-## Verification Plan
-
-What needs to be checked to confirm this resolution actually fixes the issue (tests to run, manual checks to perform). This is executed by `/issue_04_verify`, not here.
+**Verification plan:** What must be checked to confirm this actually fixes the issue. Executed by `/issue_04_verify`, not here.
 ```
 
 **Next step:** Run `/issue_04_verify {project-name} {issue-id}`.

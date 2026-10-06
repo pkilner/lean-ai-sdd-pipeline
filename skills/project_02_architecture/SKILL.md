@@ -9,7 +9,7 @@ The argument passed to this skill is the project name in kebab-case.
 
 ## Architecture coverage
 
-Describe the whole agreed product, including capabilities assigned to later delivery increments. Read the project brief's delivery sequence, distinguish target architecture from implemented state, and keep unresolved product candidates conditional. Cover shared domain concepts, component relationships, data flows, security boundaries, and API conventions. Feature technical designs and API specifications refine this architecture rather than replace it.
+Describe the whole agreed product, including capabilities assigned to later delivery increments. Read the project brief's delivery sequence, distinguish target architecture from implemented state, and keep unresolved product candidates conditional. Cover shared domain concepts, component relationships, data flows, security boundaries, and API conventions. Feature specs refine this architecture rather than replace it.
 
 For a layer not yet built, label its repository path as planned (or TBD if undecided) and its status as not started. Existing layers must use their actual paths. Do not create implementation directories merely to make the architecture appear complete.
 
@@ -26,6 +26,8 @@ For a layer not yet built, label its repository path as planned (or TBD if undec
 5. After writing the file, present the Review Checklist to the user.
 
 6. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header, and add `> Approved: {today's date}` on the line beneath it, before ending your turn. Until this document is Approved, `feature_00_init` will refuse to proceed.
+
+**Keep the status current:** whenever this skill creates its document or changes a Status, finish by running `project_90_status {project-name}` so `STATUS.md` matches before ending your turn.
 
 ---
 

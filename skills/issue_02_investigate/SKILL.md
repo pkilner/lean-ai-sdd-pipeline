@@ -5,13 +5,15 @@ description: Investigate a classified issue — the third step in the issue work
 
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID (e.g. `my-app ISSUE-0008`).
 
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+
 ## Steps
 
-1. Read `projects/{project-name}/issues/{issue-id}/01_issue.md` (required — do not proceed if missing, or if `Category` is still "Pending classification"; tell the user to run `/issue_01_capture` again, or `system_issue_classify` will already have run automatically as part of that).
+1. Read `{project-root}/issues/{issue-id}/01_issue.md` (required — do not proceed if missing, or if `Category` is still "Pending classification"; tell the user to run `/issue_01_capture` again, or `system_issue_classify` will already have run automatically as part of that).
 
-2. Read any features or ADRs referenced in `Related Features / ADRs`, plus `projects/{project-name}/02_project_architecture.md` to locate the relevant layer and repository path.
+2. Read any features or ADRs referenced in `Related Features / ADRs`, plus `{project-root}/02_project_architecture.md` to locate the relevant layer and repository path.
 
-3. Inspect the application repository (`repo_path` in `projects/{project-name}/project.yaml`) for the relevant implementation. This step is read-only — do not modify application code here.
+3. Inspect the application repository (`repo_path` in the project pointer) for the relevant implementation. This step is read-only — do not modify application code here.
 
 4. If code and documentation disagree, do not assume either is correct — classify the mismatch using the Reconciliation model:
    - **Code defect** — implementation does not match agreed spec and documentation is correct
@@ -20,7 +22,7 @@ The arguments passed to this skill are the project name in kebab-case, followed 
    - **Ambiguous intent** — the spec itself doesn't clearly say what should happen
    - **Scope change** — the requirement itself has changed since the spec was written
 
-5. Generate `projects/{project-name}/issues/{issue-id}/02_investigation.md` using the template below.
+5. Generate `{project-root}/issues/{issue-id}/02_investigation.md` using the template below.
 
 6. If `01_issue.md`'s `Category` is `Pending Investigation`, this investigation has now produced enough evidence to classify it properly — set `Category` to the correct value from the list in `system_issue_classify` before finishing.
 

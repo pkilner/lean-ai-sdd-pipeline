@@ -1,13 +1,25 @@
 # projects/
 
-This directory contains the specification and workflow artifacts for the application projects managed by this pipeline — one subdirectory per project, named after the project.
+This directory holds one local pointer per application project registered on this machine. It contains no specifications — every artifact the pipeline generates lives in the project's own application repository, under `sdd/`.
 
 ## Structure
 
 ```text
 projects/
-└── <project-name>/
+└── <project-name>.yaml    ← pointer: repo_path only, gitignored
+```
+
+```yaml
+repo_path: ../my-app
+```
+
+`repo_path` is the relative path from this pipeline repo's root to the sibling application repository. The project's artifacts are at `{repo_path}/sdd/`:
+
+```text
+<application-repository>/
+└── sdd/
     ├── project.yaml
+    ├── STATUS.md
     ├── 01_project_brief.md
     ├── 02_project_architecture.md
     ├── adr/
@@ -27,8 +39,8 @@ projects/
             └── 04_verification.md
 ```
 
-Each `<project-name>/` corresponds to one sibling application repository, referenced by `repo_path` in that project's `project.yaml`. See the root `README.md` for the full workflow (project → feature → issue) and how these documents relate to each other.
+Pointers are gitignored: they hold machine-specific paths, and keeping them out of history means nothing about a project is committed to this repo. See the root `README.md` for the full workflow (project → feature → issue) and how these documents relate to each other.
 
-## Creating a project
+## Creating or registering a project
 
-Developers shall not manually create project structures unless necessary. The `project_00_init` skill creates the required project scaffold — it validates the target application repository and writes `project.yaml`, so a project directory should only ever come into existence through that skill.
+Developers shall not manually create project structures unless necessary. The `project_00_init` skill validates the target application repository, creates the `sdd/` scaffold and `project.yaml` inside it, and writes the pointer here. On a fresh clone of this repo, running `project_00_init` against an application repository that already has `sdd/project.yaml` registers the pointer without touching the existing artifacts.

@@ -5,18 +5,20 @@ description: Generate an Implementation Plan — the sixth step in the feature w
 
 The arguments passed to this skill are the project name in kebab-case, followed by the feature name in kebab-case.
 
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+
 ## Steps
 
 1. Read the following for context:
-   - `projects/{project-name}/features/{feature-name}/01_feature_brief.md` (required)
-   - `projects/{project-name}/features/{feature-name}/02_technical_design.md` (required)
-   - `projects/{project-name}/features/{feature-name}/03_api_spec.md` (if it exists)
-   - `projects/{project-name}/features/{feature-name}/04_test_spec.md` (required — do not proceed if missing)
-   - `projects/{project-name}/02_project_architecture.md` (if it exists)
+   - `{project-root}/features/{feature-name}/01_feature_brief.md` (required)
+   - `{project-root}/features/{feature-name}/02_technical_design.md` (required)
+   - `{project-root}/features/{feature-name}/03_api_spec.md` (if it exists)
+   - `{project-root}/features/{feature-name}/04_test_spec.md` (required — do not proceed if missing)
+   - `{project-root}/02_project_architecture.md` (if it exists)
 
-2. **Review gate:** check `04_test_spec.md`'s Status. If `Draft`, stop here and tell the user it needs review and approval first. If the user confirms approval in response, update its Status to `Approved`, then continue.
+2. **Review gate:** check `04_test_spec.md`'s Status. If `Draft`, stop here and tell the user it needs review and approval first. If the user confirms approval in response, update its Status to `Approved`, add `> Approved: {today's date}` on the line beneath it, then continue.
 
-3. Generate `projects/{project-name}/features/{feature-name}/05_implementation_plan.md` using the template below. Every task starts with **Status: Not Started**.
+3. Generate `{project-root}/features/{feature-name}/05_implementation_plan.md` using the template below. Every task starts with **Status: Not Started**.
 
 4. Tasks must be broken down to the level of individual coding tasks — not milestones or epics. Each task should be something a developer can pick up and complete independently.
 
@@ -33,9 +35,9 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 7. After writing the file, present the Review Checklist to the user.
 
-8. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Implementation should not begin against a Draft plan.
+8. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header, and add `> Approved: {today's date}` on the line beneath it, before ending your turn. Implementation should not begin against a Draft plan.
 
-9. **As implementation happens** (in the application repository, `repo_path` in `project.yaml`), whenever Claude completes work on one of these tasks, update that task's Status column before ending the turn (`Not Started` → `In Progress` → `Complete`, or `Blocked` with a one-line reason in Notes if stuck). Never mark a task `Complete` without the tests it's responsible for actually existing and passing.
+9. **As implementation happens** (in the application repository, outside `sdd/`), whenever Claude completes work on one of these tasks, update that task's Status column before ending the turn (`Not Started` → `In Progress` → `Complete`, or `Blocked` with a one-line reason in Notes if stuck). Never mark a task `Complete` without the tests it's responsible for actually existing and passing.
 
 10. **When every task's Status becomes Complete**, automatically invoke `system_consistency_review {project-name} {feature-name}` before telling the user the feature is done, and record the outcome in this document's `Verified` header field. Do not report a feature as fully built on the basis of the implementation plan alone — completion of all tasks means **Implemented**, not **Verified**; verification requires a passing consistency review.
 
@@ -59,7 +61,7 @@ Brief summary of the build approach and any important sequencing notes.
 
 ## Layer Key
 
-Define one letter per system layer used in this project (pull these from `projects/{project-name}/02_project_architecture.md` — do not default to the example below unless it's actually accurate for this project).
+Define one letter per system layer used in this project (pull these from `{project-root}/02_project_architecture.md` — do not default to the example below unless it's actually accurate for this project).
 
 Example for a client/server web app:
 - **F** — Frontend

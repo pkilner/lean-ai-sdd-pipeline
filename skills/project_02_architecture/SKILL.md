@@ -5,19 +5,27 @@ description: Generate the project Architecture document — the third step in th
 
 The argument passed to this skill is the project name in kebab-case.
 
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+
+## Architecture coverage
+
+Describe the whole agreed product, including capabilities assigned to later delivery increments. Read the project brief's delivery sequence, distinguish target architecture from implemented state, and keep unresolved product candidates conditional. Cover shared domain concepts, component relationships, data flows, security boundaries, and API conventions. Feature technical designs and API specifications refine this architecture rather than replace it.
+
+For a layer not yet built, label its repository path as planned (or TBD if undecided) and its status as not started. Existing layers must use their actual paths. Do not create implementation directories merely to make the architecture appear complete.
+
 ## Steps
 
-1. Read `projects/{project-name}/project.yaml` and `projects/{project-name}/01_project_brief.md` (required — do not proceed if either is missing).
+1. Read `{project-root}/project.yaml` and `{project-root}/01_project_brief.md` (required — do not proceed if either is missing).
 
-2. **Review gate:** check `01_project_brief.md`'s Status field. If it is `Draft`, stop here, tell the user the brief needs review and approval first, and do not generate this document. If the user confirms approval in response, update `01_project_brief.md`'s Status to `Approved`, then continue.
+2. **Review gate:** check `01_project_brief.md`'s Status field. If it is `Draft`, stop here, tell the user the brief needs review and approval first, and do not generate this document. If the user confirms approval in response, update `01_project_brief.md`'s Status to `Approved`, add `> Approved: {today's date}` on the line beneath it, then continue.
 
-3. Using `repo_path` from `project.yaml`, inspect the application repository's top-level structure to infer the project's actual system layers and where each one lives (e.g. `frontend/` + `backend/` → Frontend/Backend; a single package with `src/` → collapse to one layer; a mobile app + serverless backend → On-Device/Cloud). Do not guess beyond what the code and brief support — leave layers marked TBD where genuinely unclear.
+3. Using `repo_path` from the project pointer, inspect the application repository's top-level structure (ignoring `sdd/`, which holds these pipeline artifacts, not application code) to infer the project's actual system layers and where each one lives (e.g. `frontend/` + `backend/` → Frontend/Backend; a single package with `src/` → collapse to one layer; a mobile app + serverless backend → On-Device/Cloud). Do not guess beyond what the code and brief support — leave layers marked TBD where genuinely unclear.
 
-4. Generate `projects/{project-name}/02_project_architecture.md` using the template below. Use this project's real layer names throughout, and give every layer a real repository path — every other skill in this pipeline pulls layer names and paths from this file, so accuracy here matters more than completeness.
+4. Generate `{project-root}/02_project_architecture.md` using the template below. Use this project's real layer names throughout, and give every existing layer its real repository path and label proposed paths for not-started layers as planned — every other skill in this pipeline pulls layer names and paths from this file, so accuracy here matters more than completeness.
 
 5. After writing the file, present the Review Checklist to the user.
 
-6. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Until this document is Approved, `feature_00_init` will refuse to proceed.
+6. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header, and add `> Approved: {today's date}` on the line beneath it, before ending your turn. Until this document is Approved, `feature_00_init` will refuse to proceed.
 
 ---
 
@@ -44,6 +52,10 @@ Common shapes, for reference only — replace with what actually fits this proje
 - **Status:** not started / in progress / complete
 
 (Repeat per layer)
+
+## Whole-System Design
+
+Describe component relationships, shared domain concepts and data flows, identity and security boundaries, and shared API/versioning conventions. Map agreed capabilities to components and delivery increments. Distinguish planned behavior from implemented behavior; leave detailed feature algorithms and contracts to feature documents.
 
 ## Key Technical Decisions
 
@@ -73,7 +85,7 @@ Decisions that are settled and should not be revisited without a new ADR. Every 
 
 Before running the next skill, confirm:
 
-- [ ] Layer names match how the application repository is actually organized
+- [ ] Existing layer names match the application repository; planned layers are explicitly distinguished
 - [ ] Every layer has a repository path, responsibility, and status
 - [ ] Locked decisions are genuinely settled, each backed by an Accepted ADR
 - [ ] Open decisions are tracked, not silently dropped

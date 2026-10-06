@@ -1,17 +1,19 @@
 ---
 name: issue_01_capture
-description: Capture a new issue — the first step in the issue workflow. Creates projects/{project-name}/issues/ISSUE-xxxx/ with an 01_issue.md describing what was observed, then automatically classifies it. Issues are siblings of features, not nested beneath them.
+description: Capture a new issue — the first step in the issue workflow. Creates sdd/issues/ISSUE-xxxx/ in the project's application repository with an 01_issue.md describing what was observed, then automatically classifies it. Issues are siblings of features, not nested beneath them.
 ---
 
 The arguments passed to this skill are the project name in kebab-case, followed by a short free-text description of what was observed (e.g. `my-app "sync fails silently when offline for more than 24h"`).
 
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+
 ## Steps
 
-1. Read `projects/{project-name}/project.yaml` (required — do not proceed if the project has not been initialized).
+1. Read `{project-root}/project.yaml` (required — do not proceed if the project has not been initialized).
 
-2. Scan `projects/{project-name}/issues/` for existing `ISSUE-xxxx` directories to determine the next number, zero-padded to 4 digits (e.g. if `ISSUE-0007` exists, next is `ISSUE-0008`; if none exist, start at `ISSUE-0001`).
+2. Scan `{project-root}/issues/` for existing `ISSUE-xxxx` directories to determine the next number, zero-padded to 4 digits (e.g. if `ISSUE-0007` exists, next is `ISSUE-0008`; if none exist, start at `ISSUE-0001`).
 
-3. Create `projects/{project-name}/issues/ISSUE-{xxxx}/`.
+3. Create `{project-root}/issues/ISSUE-{xxxx}/`.
 
 4. Generate `01_issue.md` using the template below.
 
@@ -46,7 +48,7 @@ What was observed, in the reporter's own words.
 
 ## Related Features / ADRs
 
-List any features (`projects/{project-name}/features/{feature-name}/`) or ADRs this issue appears to relate to. Leave blank if unknown — this will be filled in during investigation.
+List any features (`features/{feature-name}/`) or ADRs this issue appears to relate to. Leave blank if unknown — this will be filled in during investigation.
 
 ## Impact / Severity
 

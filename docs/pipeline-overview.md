@@ -10,21 +10,30 @@ This pipeline is not an enterprise ALM platform. Every document, gate, and skill
 
 ## Repository Structure
 
-This repo (`lean-ai-sdd-pipeline`) and each application it specs live as sibling directories in a workspace. This repo owns specs, architecture, ADRs, and issues; the application repo owns only source, tests, deployment, and config. No skills are copied into application repos — everything runs from here, reaching into the application repo via a validated `repo_path`.
+This repo (`lean-ai-sdd-pipeline`) and each application it specs live as sibling directories in a workspace. This repo owns the skills; each application repo owns its source, tests, deployment, and config, plus — under `sdd/` — its own specs, architecture, ADRs, and issues. No skills are copied into application repos — everything runs from here, reaching into the application repo via a validated `repo_path` held in a local, gitignored pointer.
 
 ```text
 lean-ai-sdd-pipeline/
+├── .claude/skills → ../skills
 ├── skills/{project_*, feature_*, issue_*, system_*}
 ├── docs/pipeline-overview.md   ← this document
-└── projects/<project-name>/
-    ├── project.yaml, 01_project_brief.md, 02_project_architecture.md, adr/
-    ├── features/<feature-name>/{...}
-    └── issues/ISSUE-xxxx/{...}
+└── projects/<project-name>.yaml   ← local pointer (repo_path only), gitignored
+
+<application-repository>/sdd/
+├── project.yaml, 01_project_brief.md, 02_project_architecture.md, adr/
+├── features/<feature-name>/{...}
+└── issues/ISSUE-xxxx/{...}
 ```
 
 ## Project Hierarchy
 
-One project = one application repository. `project_00_init` validates the repo and writes `project.yaml`; `project_01_brief` and `project_02_architecture` establish what the project is and how it's structured, each behind a review gate; `project_adr` records project-wide decisions as needed. `project_90_status` can be run anytime for a display-only health/state summary.
+One project = one application repository. `project_00_init` validates the repo, scaffolds `sdd/` (with `project.yaml`) inside it, and registers the local pointer; `project_01_brief` and `project_02_architecture` establish what the project is and how it's structured, each behind a review gate; `project_adr` records project-wide decisions as needed. `project_90_status` can be run anytime for a health/state summary, which it also saves as a snapshot to `sdd/STATUS.md`.
+
+## Project scope and delivery
+
+Maintain one project brief and one project architecture for the whole intended product. Release order does not define project scope. Separate agreed capabilities, unresolved product candidates, and explicit product exclusions; do not promote a candidate to a commitment or classify an agreed later capability as excluded.
+
+A feature is a bounded, testable delivery increment. It may span several capabilities and system layers, including a proof-of-concept phase. Keep a lightweight delivery sequence in the project brief with feature IDs, outcomes, dependencies, and links to specifications once they exist. Planning rows are not evidence that feature documents exist or that work is approved or implemented.
 
 ## Feature Hierarchy
 
@@ -36,7 +45,7 @@ Issues are siblings of features, not nested beneath them, since one issue can sp
 
 ## Status Skills
 
-`project_90_status`, `feature_90_status`, and `issue_90_status` are display-only — they never write or modify any file. Each internally invokes the relevant system skills (`system_workflow_resume`, `system_consistency_review`, `system_next_step`) rather than re-deriving state itself, and maps a `system_consistency_review` verdict to a health indicator: `PASS` → 🟢 Healthy, `PASS WITH WARNINGS` → 🟡 Attention Required, `FAIL` → 🔴 Blocked. `issue_90_status` has no health indicator — consistency verdicts are scoped to a project or feature, not an individual issue, so there is nothing real to map one from.
+`project_90_status`, `feature_90_status`, and `issue_90_status` report state without modifying any project document. `project_90_status` also saves its summary to `sdd/STATUS.md` as a snapshot for people to open; no skill reads that file to determine state. The other two write nothing. Each internally invokes the relevant system skills (`system_workflow_resume`, `system_consistency_review`, `system_next_step`) rather than re-deriving state itself, and maps a `system_consistency_review` verdict to a health indicator: `PASS` → 🟢 Healthy, `PASS WITH WARNINGS` → 🟡 Attention Required, `FAIL` → 🔴 Blocked. `issue_90_status` has no health indicator — consistency verdicts are scoped to a project or feature, not an individual issue, so there is nothing real to map one from.
 
 ## System Skills
 
@@ -44,7 +53,7 @@ Issues are siblings of features, not nested beneath them, since one issue can sp
 
 ## Review Gates
 
-Every generated document starts `Status: Draft`. The skill owning the next step checks this before doing anything — if the prerequisite is still `Draft`, it stops and names what needs review. The status only flips to `Approved` on explicit user confirmation. This is a single field, not an approval engine.
+Every generated document starts `Status: Draft`. The skill owning the next step checks this before doing anything — if the prerequisite is still `Draft`, it stops and names what needs review. The status only flips to `Approved` on explicit user confirmation, and the approval date is recorded beneath it. This is a single field, not an approval engine.
 
 ## Reconciliation
 
@@ -94,8 +103,9 @@ flowchart TD
 
     WS[Workspace]:::structure --> PR[Pipeline Repository]:::structure
     WS --> AR[Application Repository]:::impl
-    PR -->|validated repo_path| AR
-    PR --> PROJS[projects/]:::structure
+    PR --> PROJS[projects/ - local pointers]:::structure
+    PROJS -->|validated repo_path| AR
+    AR --> SDD[sdd/ - all project artifacts]:::structure
 
     subgraph PROJ[Project Workflow]
         direction TB
@@ -109,7 +119,7 @@ flowchart TD
         G2 -->|yes| ADR1[project_adr - optional]:::userSkill
         ADR1 --> ADOC1[ADR - Proposed]:::doc
     end
-    PROJS --> PI
+    SDD --> PI
     G2 -->|yes| FI
 
     subgraph FEAT[Feature Workflow]

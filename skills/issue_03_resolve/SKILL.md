@@ -5,22 +5,24 @@ description: Resolve an investigated issue — the fourth step in the issue work
 
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID.
 
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+
 ## Steps
 
-1. Read `projects/{project-name}/issues/{issue-id}/02_investigation.md` (required — do not proceed if missing).
+1. Read `{project-root}/issues/{issue-id}/02_investigation.md` (required — do not proceed if missing).
 
 2. **Before touching the application repository:**
-   - Re-confirm `repo_path` from `project.yaml` resolves to a real git repository (per the checks in `project_00_init` — do not assume it still holds).
+   - Re-confirm `repo_path` from the project pointer resolves to a real git repository (per the checks in `project_00_init` — do not assume it still holds).
    - Run `git -C {repo_path} status` and note the current state. If there is unrelated uncommitted work, tell the user and confirm how to proceed rather than editing over it.
    - Only touch files required to implement the recommended corrective action — do not opportunistically refactor or "clean up" nearby code.
 
 3. Apply the recommended corrective action from the investigation:
-   - If it requires a spec update, update the relevant document(s) under `projects/{project-name}/features/{feature-name}/` (or `02_project_architecture.md` / `01_project_brief.md` for project-wide issues) and follow the standard top-down propagation order (01_feature_brief → 02_technical_design → 03_api_spec → 04_test_spec → 05_implementation_plan).
+   - If it requires a spec update, update the relevant document(s) under `{project-root}/features/{feature-name}/` (or `02_project_architecture.md` / `01_project_brief.md` for project-wide issues) and follow the standard top-down propagation order (01_feature_brief → 02_technical_design → 03_api_spec → 04_test_spec → 05_implementation_plan).
    - If it requires a code fix, implement it in the application repository.
    - If it requires both, do the spec update first, then the code fix, so the code is brought into line with an already-corrected spec.
-   - **Never run `git commit` or `git push` in the application repository as part of this skill.** Leave changes staged/unstaged for the user to review and commit themselves.
+   - **Never run `git commit` or `git push` in the application repository as part of this skill.** Leave changes staged/unstaged for the user to review and commit themselves — this includes the spec updates, which live in the same repository under `sdd/`.
 
-4. Generate `projects/{project-name}/issues/{issue-id}/03_resolution.md` using the template below.
+4. Generate `{project-root}/issues/{issue-id}/03_resolution.md` using the template below.
 
 5. List every document and file actually changed, including files in the application repository — this list is both part of the output document and something you state plainly to the user.
 

@@ -5,6 +5,8 @@ description: Display a status summary for one issue when an issue ID is supplied
 
 The first argument is the project name in kebab-case. The second, optional, argument is an issue ID.
 
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+
 ## Steps
 
 ### If an issue ID is supplied

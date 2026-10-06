@@ -5,16 +5,22 @@ description: Generate a Test Spec — the fifth step in the feature workflow, ru
 
 The arguments passed to this skill are the project name in kebab-case, followed by the feature name in kebab-case.
 
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+
+## Regression across increments
+
+Read prerequisite features' accepted behavior and test specifications. Include commands for the existing regression suites alongside tests for the new increment. Keep inherited criteria at their source and identify cross-feature references by both feature ID and AC/test ID. Do not weaken an earlier acceptance gate merely because a later delivery phase adds capabilities.
+
 ## Steps
 
 1. Read the following for context:
-   - `projects/{project-name}/features/{feature-name}/01_feature_brief.md` (required — this is where AC-N identifiers come from)
-   - `projects/{project-name}/features/{feature-name}/02_technical_design.md` (required)
-   - `projects/{project-name}/features/{feature-name}/03_api_spec.md` (required only if 02_technical_design.md's `API Specification Required` is `Yes`)
+   - `{project-root}/features/{feature-name}/01_feature_brief.md` (required — this is where AC-N identifiers come from)
+   - `{project-root}/features/{feature-name}/02_technical_design.md` (required)
+   - `{project-root}/features/{feature-name}/03_api_spec.md` (required only if 02_technical_design.md's `API Specification Required` is `Yes`)
 
-2. **Review gate:** confirm `02_technical_design.md` has `Status: Approved`, and `03_api_spec.md` too if it is required for this feature. If either is still `Draft`, stop here and tell the user which document needs review/approval first. If the user confirms approval in response, update that document's Status to `Approved`, then continue.
+2. **Review gate:** confirm `02_technical_design.md` has `Status: Approved`, and `03_api_spec.md` too if it is required for this feature. If either is still `Draft`, stop here and tell the user which document needs review/approval first. If the user confirms approval in response, update that document's Status to `Approved`, add `> Approved: {today's date}` on the line beneath it, then continue.
 
-3. Generate `projects/{project-name}/features/{feature-name}/04_test_spec.md` using the template below.
+3. Generate `{project-root}/features/{feature-name}/04_test_spec.md` using the template below.
 
 4. Give every test a stable ID (`UT-N` for unit, `IT-N` for integration, `E2E-N` for end-to-end, `EC-N` for edge case, `PT-N` for performance). `feature_05_implementation_plan` references these IDs directly — do not renumber tests once `05_implementation_plan.md` exists without also updating it.
 
@@ -24,12 +30,12 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 7. Every test spec **must** include a "Test Suite Metadata" section (see template) that defines:
    - The named test suites and which tier each belongs to (see the tier model below)
-   - The command(s) used to run each suite in the application repository — check `projects/{project-name}/project.yaml` for `repo_path`, then that repository's own docs, or ask the user if it doesn't document a test runner yet
+   - The command(s) used to run each suite in the application repository — locate the application repository via `repo_path` in the project pointer, then check that repository's own docs, or ask the user if it doesn't document a test runner yet
    - Whether the runner produces machine-readable (JSON/XML) and/or human-readable output, and where reports land
 
 8. After writing the file, present the Review Checklist to the user.
 
-9. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Until this document is Approved, `feature_05_implementation_plan` will refuse to proceed.
+9. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header, and add `> Approved: {today's date}` on the line beneath it, before ending your turn. Until this document is Approved, `feature_05_implementation_plan` will refuse to proceed.
 
 ---
 

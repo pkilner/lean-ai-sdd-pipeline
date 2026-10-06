@@ -59,3 +59,16 @@ In the new layout:
 ## Verification
 
 `system_consistency_review` was extended to work project-wide (all features) in addition to its original single-feature scope, and to check that every test ID in a feature's `test-spec.md` has a home in that feature's `implementation-plan.md` Test Coverage Map (new check, made possible by change #4).
+
+## Later change: project artifacts moved into the application repository
+
+Supersedes change #1 above and the vNext spec's statement that the pipeline repository owns specifications, architecture, ADRs, and issue tracking.
+
+Every artifact the skills generate — `project.yaml`, `01_project_brief.md`, `02_project_architecture.md`, ADRs, feature documents, and issues — is now written to `sdd/` inside the project's application repository instead of `projects/<project-name>/` in this repo. Skills refer to that directory as `{project-root}`.
+
+- `projects/<project-name>.yaml` in this repo is a local, gitignored pointer holding only `repo_path`. `{project-root}` is `{repo_path}/sdd`.
+- `repo_path` moved out of `project.yaml` (which now lives in the application repository) into the pointer.
+- `project_00_init` creates the `sdd/` scaffold and the pointer, and registers an existing `sdd/` without modifying it when run on a machine that has no pointer yet.
+- `.claude/skills` is a symlink to `skills/`, so Claude Code discovers the skills when run from this repo.
+
+Reason: specs are versioned and access-controlled with the code they describe, so a private application's specs stay private while this pipeline repo is shared. Skills are still never copied into application repositories.

@@ -5,22 +5,28 @@ description: Generate an API & Schema Spec — the fourth step in the feature wo
 
 The arguments passed to this skill are the project name in kebab-case, followed by the feature name in kebab-case.
 
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+
+## Cross-feature continuity
+
+Read the project brief's delivery sequence and the specifications of declared prerequisite features. Describe what this increment adds or changes and reference unchanged contracts at their authoritative source. Preserve earlier accepted behavior and shared project conventions. Explicitly describe migrations and compatibility when changing a prior contract; a feature document must not silently override the project architecture or another feature's approved specification.
+
 ## Steps
 
 1. Read the following for context:
-   - `projects/{project-name}/features/{feature-name}/01_feature_brief.md` (required)
-   - `projects/{project-name}/features/{feature-name}/02_technical_design.md` (required — do not proceed if missing)
-   - `projects/{project-name}/02_project_architecture.md` (if it exists)
+   - `{project-root}/features/{feature-name}/01_feature_brief.md` (required)
+   - `{project-root}/features/{feature-name}/02_technical_design.md` (required — do not proceed if missing)
+   - `{project-root}/02_project_architecture.md` (if it exists)
 
-2. **Review gate:** check `02_technical_design.md`'s Status. If `Draft`, stop here and tell the user it needs review and approval first. If the user confirms approval in response, update its Status to `Approved`, then continue.
+2. **Review gate:** check `02_technical_design.md`'s Status. If `Draft`, stop here and tell the user it needs review and approval first. If the user confirms approval in response, update its Status to `Approved`, add `> Approved: {today's date}` on the line beneath it, then continue.
 
 3. Check `02_technical_design.md`'s `API Specification Required` field. If it says `No`, stop and tell the user this skill isn't needed for this feature — go straight to `/feature_04_test_spec {project-name} {feature-name}`.
 
-4. Generate `projects/{project-name}/features/{feature-name}/03_api_spec.md` using the template below.
+4. Generate `{project-root}/features/{feature-name}/03_api_spec.md` using the template below.
 
 5. After writing the file, present the Review Checklist to the user.
 
-6. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header before ending your turn. Until this document is Approved (when required), `feature_04_test_spec` will refuse to proceed.
+6. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header, and add `> Approved: {today's date}` on the line beneath it, before ending your turn. Until this document is Approved (when required), `feature_04_test_spec` will refuse to proceed.
 
 ---
 

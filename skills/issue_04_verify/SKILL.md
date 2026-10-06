@@ -5,13 +5,15 @@ description: Verify a resolved issue — the fifth and final step in the issue w
 
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID.
 
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+
 ## Steps
 
-1. Read `projects/{project-name}/issues/{issue-id}/03_resolution.md` (required — do not proceed if missing).
+1. Read `{project-root}/issues/{issue-id}/03_resolution.md` (required — do not proceed if missing).
 
 2. Execute the Verification Plan from the resolution: run the relevant tests (see the feature's `04_test_spec.md` if applicable) and/or perform the manual checks it describes.
 
-3. Generate `projects/{project-name}/issues/{issue-id}/04_verification.md` using the template below.
+3. Generate `{project-root}/issues/{issue-id}/04_verification.md` using the template below.
 
 4. If verification passes, update `01_issue.md`'s Status to `Closed` and add a Status History entry. If verification fails, update Status back to `Open`, note why in Status History, and tell the user this needs to return to `/issue_02_investigate` or `/issue_03_resolve`.
 

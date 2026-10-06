@@ -5,6 +5,8 @@ description: Display a status summary for a single feature — health, current s
 
 The arguments are the project name in kebab-case, followed by the feature name in kebab-case.
 
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+
 ## Steps
 
 1. Internally invoke `system_workflow_resume {project-name}` and read this feature's entry from the briefing it produces (its current state, and which document is blocking progress if it's still in definition).

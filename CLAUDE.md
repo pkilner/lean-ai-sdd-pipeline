@@ -1,13 +1,22 @@
 # lean-ai-sdd-pipeline
 
-This repo is the Spec-Driven Development pipeline itself — specs, architecture, ADRs, issue tracking, and Claude skills for one or more application projects that live as sibling repos. See `README.md` for the full model.
+This repo is the Spec-Driven Development pipeline itself — the Claude skills that drive specs, architecture, ADRs, and issue tracking for one or more application projects that live as sibling repos. See `README.md` for the full model.
+
+## Where Artifacts Live
+
+Every artifact the skills generate lives in the project's **application repository**, under `sdd/` — never in this repo. Skills call that directory `{project-root}`:
+
+- `projects/<project-name>.yaml` in this repo is a local, gitignored pointer holding only `repo_path` (relative path from this repo's root to the application repository).
+- `{project-root}` is `{repo_path}/sdd` — it holds `project.yaml`, `01_project_brief.md`, `02_project_architecture.md`, `adr/`, `features/`, and `issues/`.
+
+Do not write project artifacts under `projects/` in this repo.
 
 ## On Every Session Start
 
 This is an instruction to Claude, not something the user needs to ask for:
 
 1. If a project is named, or obvious from context, invoke `system_workflow_resume` for that project yourself and open with the briefing it produces (what exists, what's in progress, open issues, recommended next action).
-2. If no project is named and more than one exists under `projects/`, invoke `system_workflow_resume` with no argument to list all projects and their status first.
+2. If no project is named and more than one is registered under `projects/`, invoke `system_workflow_resume` with no argument to list all projects and their status first.
 
 `system_workflow_resume` is a `system_*` skill — Claude runs it directly; it is not exposed as something the user types.
 
@@ -17,11 +26,17 @@ This is an instruction to Claude, not something the user needs to ask for:
 
 | Command | Step | Purpose |
 |---|---|---|
-| `/project_00_init <project-name> <repo-path>` | 1 | Validate and register a project's sibling application repo |
+| `/project_00_init <project-name> <repo-path>` | 1 | Validate a project's sibling application repo, scaffold `sdd/` inside it, and register the local pointer |
 | `/project_01_brief <project-name>` | 2 | What the project is, who it's for, what success looks like |
 | `/project_02_architecture <project-name>` | 3 | System layers (with repo path + responsibility + status), key decisions, data stores |
 | `/project_adr <project-name> <decision-title>` | as needed | Record a project-wide architectural decision (starts `Proposed`) |
-| `/project_90_status <project-name>` | anytime | Display-only status: health, current state, document/feature/issue/ADR summary, recommended next step |
+| `/project_90_status <project-name>` | anytime | Status: health, current state, document/feature/issue/ADR summary, recommended next step — displayed, and saved as a snapshot to `sdd/STATUS.md` |
+
+### Project scope and delivery
+
+Maintain one project brief and one project architecture for the whole intended product. Release order does not define project scope. Separate agreed capabilities, unresolved product candidates, and explicit product exclusions; do not promote a candidate to a commitment or classify an agreed later capability as excluded.
+
+A feature is a bounded, testable delivery increment. It may span several capabilities and system layers, including a proof-of-concept phase. Keep a lightweight delivery sequence in the project brief with feature IDs, outcomes, dependencies, and links to specifications once they exist. Planning rows are not evidence that feature documents exist or that work is approved or implemented.
 
 ### Feature lifecycle (`feature_*`) — user-facing
 
@@ -65,16 +80,16 @@ Do not tell the user to run these as commands. Invoke them yourself, at the poin
 
 ## Operational Safety
 
-Any time you (Claude) are about to modify files in the application repository (`repo_path`), whether via `issue_03_resolve` or while implementing a task from `05_implementation_plan.md`:
+Any time you (Claude) are about to modify application code — files in the application repository (`repo_path`) outside `sdd/` — whether via `issue_03_resolve` or while implementing a task from `05_implementation_plan.md`:
 
 - Re-validate `repo_path` resolves to a real git repository before editing.
 - Run `git -C {repo_path} status` first. If there's unrelated uncommitted work, tell the user and confirm before editing over it.
 - Touch only the files required for the task — no opportunistic refactors.
-- Never run `git commit` or `git push` in the application repository on your own initiative.
+- Never run `git commit` or `git push` in the application repository on your own initiative — this covers the `sdd/` artifacts too.
 - Always summarize which files you changed.
 
 ## Notes
 
-- No skills are copied into application repositories. Everything here operates against `projects/<project-name>/` in this repo, reaching into the application repo only via `repo_path` (validated in `project_00_init`) for source code inspection.
+- No skills are copied into application repositories. Skills run from this repo and reach the application repo via `repo_path` (validated in `project_00_init`) — to read and write artifacts under `sdd/`, and to inspect source code.
 - The specification is the source of truth unless an approved change explicitly changes it. When code and documentation disagree, determine the intended behaviour first, update the highest authoritative artifact, then propagate downstream (`01_feature_brief → 02_technical_design → 03_api_spec → 04_test_spec → 05_implementation_plan`), and update the implementation last. Never rewrite approved documents merely to match an unapproved implementation change — if the documents are still correct, fix the code only.
 - Never report a feature as built or verified just because a document exists — check task Status and the `Verified` field, per `system_next_step`.

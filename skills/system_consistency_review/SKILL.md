@@ -6,19 +6,23 @@ user-invocable: false
 
 **This is a system skill.** It is never invoked directly by a user typing a command — it runs automatically when a feature's implementation plan reaches all-Complete, when an issue is closed, or when Claude decides a consistency check is warranted in response to a plain-language request (e.g. "is this feature actually done?"). Do not present this as something the user should run themselves; if a user wants to check consistency, invoke this skill on their behalf rather than telling them to run it.
 
-The arguments passed to this skill are the project name in kebab-case, optionally followed by a feature name in kebab-case. If no feature name is given, run the Project checks plus the Feature checks for every feature under `projects/{project-name}/features/`.
+The arguments passed to this skill are the project name in kebab-case, optionally followed by a feature name in kebab-case. If no feature name is given, run the Project checks plus the Feature checks for every feature under `{project-root}/features/`.
+
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
 
 ## Steps
 
 ### A. Project Checks
 
-1. Validate `projects/{project-name}/project.yaml` — required fields present, `repo_path` still resolves to a valid git repository not equal to the pipeline repo itself (same checks as `project_00_init`).
-2. Compare `02_project_architecture.md`'s layer list and repository paths against what actually exists in the application repo — flag layers whose declared `Repository path` doesn't exist.
-3. Check every row in `02_project_architecture.md`'s Locked Architectural Decisions table has a corresponding ADR in `projects/{project-name}/adr/` with `Status: Accepted`. Flag rows with no ADR, or whose ADR is still `Proposed`.
+1. Validate the project pointer and `{project-root}/project.yaml` — the pointer's `repo_path` still resolves to a valid git repository not equal to the pipeline repo itself (same checks as `project_00_init`), and `project.yaml` has its required fields with `name` matching `{project-name}`.
+2. Compare `02_project_architecture.md`'s layer list and repository paths against what actually exists in the application repo. A missing path explicitly marked planned/TBD for a not-started layer is expected; flag missing paths claimed as existing or implemented.
+3. Check every row in `02_project_architecture.md`'s Locked Architectural Decisions table has a corresponding ADR in `{project-root}/adr/` with `Status: Accepted`. Flag rows with no ADR, or whose ADR is still `Proposed`.
+
+4. Check project scope separately from delivery sequence: later agreed capabilities remain included, candidates remain undecided, and exclusions reflect product decisions. Planned feature rows need not have directories; validate links only when a specification is claimed to exist.
 
 ### B. Feature Checks (per feature in scope)
 
-1. Read all pipeline documents in `projects/{project-name}/features/{feature-name}/`:
+1. Read all pipeline documents in `{project-root}/features/{feature-name}/`:
    - `01_feature_brief.md` — extract `AC-N` identifiers
    - `02_technical_design.md` — extract: state/field names, formula parameter names, edge case descriptions, `API Specification Required`
    - `03_api_spec.md` — extract: data model field names, function/endpoint parameter names, validation rule field names (skip if this feature has no 03_api_spec.md and 02_technical_design.md says it isn't required)
@@ -56,9 +60,12 @@ The arguments passed to this skill are the project name in kebab-case, optionall
    ### B7. Status Integrity
    Any task marked `Complete` in `05_implementation_plan.md` whose Tests Satisfied are not actually present/passing in the application repo. A task should never be `Complete` without its tests existing.
 
+   ### B8. Cross-Feature Compatibility
+   Check dependency references and inherited acceptance criteria against their source feature documents. Confirm the test spec includes prerequisite regression suites and that shared contract changes explicitly address compatibility. Evaluate implementation coverage against the current increment and its inherited requirements, not every planned capability in the project architecture.
+
 ### C. Issue Checks (issues referencing this feature, or all issues if project-wide)
 
-1. For each issue under `projects/{project-name}/issues/` (filtered to ones listing this feature in `Related Features / ADRs`, when scoped to a feature):
+1. For each issue under `{project-root}/issues/` (filtered to ones listing this feature in `Related Features / ADRs`, when scoped to a feature):
    - Confirm `Status: Closed` issues have a `04_verification.md` with `Result: Pass`.
    - Confirm every artifact referenced in the issue (features, ADRs) still exists.
    - Flag any issue stuck in a non-terminal status with no Status History activity — note it for the user's attention (do not guess why).

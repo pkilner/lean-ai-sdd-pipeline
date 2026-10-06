@@ -8,15 +8,17 @@ user-invocable: false
 
 The arguments passed to this skill are the project name in kebab-case, optionally followed by a feature name or issue ID.
 
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. A missing pointer is handled in the steps below.
+
 ## Steps
 
 1. If only a project name is given:
-   - If `projects/{project-name}/` does not exist → recommend `/project_00_init {project-name} {repo-path}`.
+   - If the pointer `projects/{project-name}.yaml` does not exist → recommend `/project_00_init {project-name} {repo-path}` (this also registers a project whose `sdd/` already exists in its application repository).
    - Else if `01_project_brief.md` is missing → recommend `/project_01_brief {project-name}`.
    - Else if `01_project_brief.md` exists but `Status: Draft` → report it needs review; recommend confirming approval before continuing.
    - Else if `02_project_architecture.md` is missing → recommend `/project_02_architecture {project-name}`.
    - Else if `02_project_architecture.md` exists but `Status: Draft` → report it needs review; recommend confirming approval before continuing.
-   - Else → project is **Project Defined**. List any features/issues in progress (steps 2/3), or recommend `/feature_00_init {project-name} {feature-name}` to start a new feature.
+   - Else → project is **Project Defined**. List any features/issues in progress (steps 2/3). Otherwise use the project brief’s agreed delivery sequence to recommend the earliest unfinished increment whose prerequisites are verified: initialize it if its directory is absent, or resume its document workflow if present. If no sequence is agreed, recommend choosing the next feature. A planning row alone does not imply a feature exists or is approved.
 
 2. If a feature name is given, walk the feature workflow in order and recommend the first missing or unapproved step:
    1. `01_feature_brief.md` missing → `/feature_01_brief {project-name} {feature-name}`

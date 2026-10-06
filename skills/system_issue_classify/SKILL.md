@@ -8,9 +8,11 @@ user-invocable: false
 
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID.
 
+**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+
 ## Steps
 
-1. Read `projects/{project-name}/issues/{issue-id}/01_issue.md` (required — do not proceed if missing).
+1. Read `{project-root}/issues/{issue-id}/01_issue.md` (required — do not proceed if missing).
 
 2. Based on the Description and (if present) Steps to Reproduce, assign exactly one **Category**:
    - **Defect** — the implementation does something wrong relative to the agreed spec

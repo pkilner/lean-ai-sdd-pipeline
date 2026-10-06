@@ -28,8 +28,9 @@ flowchart TD
 
     WS[Workspace]:::structure --> PR[Pipeline Repository]:::structure
     WS --> AR[Application Repository]:::impl
-    PR -->|validated repo_path| AR
-    PR --> PROJS[projects/]:::structure
+    PR --> PROJS[projects/ - local pointers]:::structure
+    PROJS -->|validated repo_path| AR
+    AR --> SDD[sdd/ - all project artifacts]:::structure
 
     subgraph PROJ[Project Workflow]
         direction TB
@@ -43,7 +44,7 @@ flowchart TD
         G2 -->|yes| ADR1[project_adr - optional]:::userSkill
         ADR1 --> ADOC1[ADR - Proposed]:::doc
     end
-    PROJS --> PI
+    SDD --> PI
     G2 -->|yes| FI
 
     subgraph FEAT[Feature Workflow]
@@ -98,16 +99,18 @@ This pipeline repository and the application(s) it specs live as sibling directo
 
 ```text
 workspace/
-├── lean-ai-sdd-pipeline/     ← this repo: specs, architecture, ADRs, issues, skills
+├── lean-ai-sdd-pipeline/     ← this repo: skills, plus a local pointer per project
 └── <application-repository>/ ← source code, tests, deployment, configuration
+    └── sdd/                  ← that project's specs, architecture, ADRs, issues
 ```
 
-The pipeline repository owns specifications, architecture, ADRs, workflow, and issue tracking. The application repository owns only source code, tests, deployment, and configuration. **No Claude skills are copied into the application repository** — run Claude Code from this pipeline repo (or a workspace root that contains both as siblings), and skills reach into the application repo via each project's validated `repo_path`.
+The pipeline repository owns the skills and the workflow. Each application repository owns its source code, tests, deployment, and configuration — and, under `sdd/`, every artifact this pipeline generates for it: `project.yaml`, briefs, architecture, ADRs, feature specs, and issues. Specs are versioned and access-controlled with the code they describe, so a private application's specs stay private even when this pipeline repo is shared. **No Claude skills are copied into the application repository** — run Claude Code from this pipeline repo (or a workspace root that contains both as siblings), and skills reach into the application repo via each project's validated `repo_path`.
 
 ## Repository layout
 
 ```text
 lean-ai-sdd-pipeline/
+├── .claude/skills → ../skills    ← how Claude Code discovers the skills
 ├── skills/
 │   ├── project_*
 │   ├── feature_*
@@ -115,32 +118,36 @@ lean-ai-sdd-pipeline/
 │   └── system_*
 │
 └── projects/
-    └── <project-name>/
-        ├── project.yaml
-        ├── 01_project_brief.md
-        ├── 02_project_architecture.md
-        ├── adr/
-        ├── features/
-        │   └── <feature-name>/
-        │       ├── 01_feature_brief.md
-        │       ├── 02_technical_design.md
-        │       ├── 03_api_spec.md
-        │       ├── 04_test_spec.md
-        │       ├── 05_implementation_plan.md
-        │       └── adr/
-        └── issues/
-            └── ISSUE-xxxx/
-                ├── 01_issue.md
-                ├── 02_investigation.md
-                ├── 03_resolution.md
-                └── 04_verification.md
+    └── <project-name>.yaml       ← local pointer (repo_path only), gitignored
+
+<application-repository>/
+└── sdd/
+    ├── project.yaml
+    ├── STATUS.md                 ← snapshot written by project_90_status
+    ├── 01_project_brief.md
+    ├── 02_project_architecture.md
+    ├── adr/
+    ├── features/
+    │   └── <feature-name>/
+    │       ├── 01_feature_brief.md
+    │       ├── 02_technical_design.md
+    │       ├── 03_api_spec.md
+    │       ├── 04_test_spec.md
+    │       ├── 05_implementation_plan.md
+    │       └── adr/
+    └── issues/
+        └── ISSUE-xxxx/
+            ├── 01_issue.md
+            ├── 02_investigation.md
+            ├── 03_resolution.md
+            └── 04_verification.md
 ```
 
-A project can wrap one application repository. The `projects/` directory supports more than one project if this pipeline repo is used to spec multiple applications.
+A project wraps one application repository. `projects/` holds one pointer per project registered on this machine, so this pipeline repo can drive more than one application. Pointers are gitignored — they hold machine-specific paths, and nothing about a project is committed here.
 
 ## Review gates: Draft → Approved
 
-Every generated document (`01_project_brief.md`, `02_project_architecture.md`, `01_feature_brief.md`, `02_technical_design.md`, `03_api_spec.md`, `04_test_spec.md`, `05_implementation_plan.md`) starts `Status: Draft`. The skill that owns the *next* step in the workflow checks this field before doing anything — if the prerequisite is still `Draft`, it stops, names the document that needs review, and does not proceed. It never approves a document on your behalf; approval only happens when you confirm the review checklist, at which point the status flips to `Approved` in that same document.
+Every generated document (`01_project_brief.md`, `02_project_architecture.md`, `01_feature_brief.md`, `02_technical_design.md`, `03_api_spec.md`, `04_test_spec.md`, `05_implementation_plan.md`) starts `Status: Draft`. The skill that owns the *next* step in the workflow checks this field before doing anything — if the prerequisite is still `Draft`, it stops, names the document that needs review, and does not proceed. It never approves a document on your behalf; approval only happens when you confirm the review checklist, at which point the status flips to `Approved` in that same document and the approval date is recorded beneath it as `Approved: {date}`.
 
 This is a single field, not an approval engine — but it means the pipeline cannot silently race ahead of what's actually been reviewed.
 
@@ -156,11 +163,11 @@ These are the skills you run directly.
 
 | Skill | Step | Produces |
 |---|---|---|
-| `project_00_init` | 1 | `project.yaml` (validates `repo_path` — must exist, be a git repo, and not be this pipeline repo itself) |
+| `project_00_init` | 1 | `sdd/project.yaml` and scaffold in the application repo, plus the local pointer (validates `repo_path` — must exist, be a git repo, and not be this pipeline repo itself) |
 | `project_01_brief` | 2 | `01_project_brief.md` |
 | `project_02_architecture` | 3 | `02_project_architecture.md` (per-layer repository path, responsibility, status) |
 | `project_adr` | as needed | `adr/adr_NNN_*.md` |
-| `project_90_status` | anytime | display only — health, current state, document/feature/issue/ADR summary, recommended next step |
+| `project_90_status` | anytime | health, current state, document/feature/issue/ADR summary, recommended next step — displayed, and saved as a snapshot to `sdd/STATUS.md` |
 
 **Feature lifecycle** — run in order for each feature, each step gated on the previous being `Approved`:
 
@@ -214,18 +221,18 @@ Then recommends the corrective action. Documents are not automatically rewritten
 
 ## Operational safety
 
-Any skill that touches the application repository (`issue_03_resolve`, and implementation itself):
+Any skill that touches application code — files in the application repository outside `sdd/` (`issue_03_resolve`, and implementation itself):
 
 - Re-validates `repo_path` before editing anything
 - Checks `git status` first and does not edit over unrelated uncommitted work without confirming with you
 - Touches only the files required for the task at hand — no opportunistic refactors
-- Never runs `git commit` or `git push` on your behalf
+- Never runs `git commit` or `git push` on your behalf — that includes the `sdd/` artifacts, which are left uncommitted for you to review
 - Reports exactly which files it changed
 
 ## Getting started
 
 1. Point Claude Code at a workspace root that contains this repo and your application repo as siblings (or run it from inside this repo, if the application repo's path is reachable).
-2. `/project_00_init my-app ../my-app` → validates the repo, creates `projects/my-app/project.yaml`.
+2. `/project_00_init my-app ../my-app` → validates the repo, creates `../my-app/sdd/project.yaml`, and registers the pointer `projects/my-app.yaml`.
 3. `/project_01_brief my-app` → review the draft → confirm → `/project_02_architecture my-app` → review → confirm.
 4. `/feature_00_init my-app checkout-flow` → `/feature_01_brief my-app checkout-flow` (writes `AC-1`, `AC-2`, ...) → review → confirm.
 5. `/feature_02_technical_design my-app checkout-flow` (declares `API Specification Required: Yes`) → review → confirm.
@@ -243,6 +250,7 @@ Any skill that touches the application repository (`issue_03_resolve`, and imple
 - **Status is tracked, not assumed.** A plan existing doesn't mean anything is built; tasks being marked Complete doesn't mean anything is verified. These are different, explicitly tracked states.
 - **Layer names and paths are not hardcoded.** `project_02_architecture` derives the project's real system layers and where their code actually lives, once, and every other skill pulls from it.
 - **Orchestration is invisible where it can be.** Classification and consistency checks happen as part of the workflow, not as extra commands you have to remember to run.
+- **Specs live with the code they describe.** Every generated artifact is written to `sdd/` in the application repository, so specs share its history, review, and access control — and this pipeline repo can be shared without exposing any project.
 - **No skills in the application repository.** Keeping all pipeline machinery in one repo means an application repo stays clean of tooling that isn't actually part of the shipped product.
 
 ## License

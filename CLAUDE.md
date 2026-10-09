@@ -2,6 +2,12 @@
 
 This repo is the Spec-Driven Development pipeline itself — the Claude skills that drive specs, architecture, ADRs, and issue tracking for one or more application projects that live as sibling repos. See `README.md` for the full model.
 
+## Working Agreement
+
+@docs/working-agreement.md
+
+The line above loads `docs/working-agreement.md`, which says how the owner and Claude work together on every project: how to communicate, whose decision is whose, what must be verified, and the rules for git, secrets, money, and access. Follow it without being asked. If its text is not already in your context, read that file before doing anything else.
+
 ## Where Artifacts Live
 
 Every artifact the skills generate lives in the project's **application repository**, under `sdd/` — never in this repo. Skills call that directory `{project-root}`:
@@ -30,6 +36,8 @@ This is an instruction to Claude, not something the user needs to ask for:
 | `/project_01_brief <project-name>` | 2 | What the project is, who it's for, what success looks like |
 | `/project_02_architecture <project-name>` | 3 | System layers (with repo path + responsibility + status), key decisions, data stores |
 | `/project_adr <project-name> <decision-title>` | as needed | Record a project-wide architectural decision (starts `Proposed`) |
+| `/project_setup_guide <project-name> "<title>"` | as needed | Write a guide for something the owner sets up by hand, then check and record the result |
+| `/project_infrastructure_map <project-name>` | after each guide | Create or update the diagrams of what exists, who can do what, and what is exposed |
 | `/project_90_status <project-name>` | anytime | Status: health, current state, document/feature/issue/ADR summary, recommended next step — displayed, and saved as a snapshot to `sdd/STATUS.md` |
 
 ### Project scope and delivery

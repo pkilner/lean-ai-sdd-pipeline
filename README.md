@@ -82,6 +82,10 @@ flowchart TD
     FS -.->|design updated| IMPL
 ```
 
+## Working agreement
+
+[`docs/working-agreement.md`](docs/working-agreement.md) records how the owner and Claude work together on every project: how Claude communicates, whose decision is whose, what must be verified before it is claimed, and the rules for git, secrets, money, and access. `CLAUDE.md` loads it into every session, so a new project starts with those habits already in place.
+
 ## Workspace layout
 
 This pipeline repository and the application(s) it specs live as sibling directories:
@@ -149,6 +153,8 @@ These are the skills you run directly.
 | `project_01_brief` | 2 | `01_project_brief.md` |
 | `project_02_architecture` | 3 | `02_project_architecture.md` (per-layer repository path, responsibility, status) |
 | `project_adr` | as needed | `adr/adr_NNN_*.md` |
+| `project_setup_guide` | as needed | a numbered guide, in the project's guides folder, for something the owner must set up by hand: fixed sections, read-only Verify commands, and a record of the result |
+| `project_infrastructure_map` | after each guide | `infrastructure-map.md` in the guides folder — diagrams of what exists and what is planned, who can do what, and what is exposed |
 | `project_90_status` | anytime | health, current state, document/feature/issue/ADR summary, recommended next step — displayed, and saved as a snapshot to `sdd/STATUS.md` |
 
 **Feature lifecycle** — run in order for each feature, each step gated on the previous being `Approved`:

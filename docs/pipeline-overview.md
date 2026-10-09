@@ -35,6 +35,12 @@ Maintain one project brief and one project architecture for the whole intended p
 
 A feature is a bounded, testable delivery increment. It may span several capabilities and system layers, including a proof-of-concept phase. Keep a lightweight delivery sequence in the project brief with feature IDs, outcomes, dependencies, and links to specifications once they exist. Planning rows are not evidence that feature documents exist or that work is approved or implemented.
 
+Two project skills are used as needed once a project reaches infrastructure. `project_setup_guide` writes a guide for anything the owner must configure by hand, then checks and records the result; `project_infrastructure_map` keeps a set of diagrams of what exists, who can do what, and what is exposed. Both write to the project's guides folder in the application repository, named by `guides_path` in `project.yaml`.
+
+## Working Agreement
+
+`docs/working-agreement.md` records how the owner and Claude work together on every project. `CLAUDE.md` loads it into every session.
+
 ## Feature Hierarchy
 
 Each feature under a project walks: `feature_00_init → feature_01_spec → feature_02_plan → implementation`. The spec says what is being built and how; the plan lists the tests and then the tasks that satisfy them — tests are written *before* tasks, not the other way around. `feature_adr` records feature-level decisions as needed. `feature_90_status` can be run anytime for a display-only health/state summary.

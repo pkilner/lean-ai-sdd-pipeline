@@ -85,3 +85,12 @@ Supersedes change #4 above and the vNext spec's five-step feature workflow and f
 Unchanged: stable `AC-N` and test IDs, task Status tracking, the Implemented/Verified distinction, the consistency review, issue classification, and the Reconciliation model.
 
 Reason: fewer documents and approvals per feature, while keeping the traceability that issue tracking depends on.
+
+## Later change: working agreement, setup guides, and infrastructure map
+
+- **`docs/working-agreement.md`** records how the owner and Claude work together, so those habits carry to every project. `CLAUDE.md` imports it, so it is in context at the start of every session.
+- **`project_setup_guide`** writes a numbered guide for anything the owner must configure by hand, with fixed sections and read-only Verify commands, then checks and records the result.
+- **`project_infrastructure_map`** creates and updates a document of diagrams showing what exists, who can do what, and what is exposed.
+- Both skills write to the application repository, in the folder named by the new optional `guides_path` field of `project.yaml`, which defaults to `docs/setup-guides`.
+
+Reason: the guides and the map proved their worth on the first project that reached infrastructure, and the way of working that produced them should not have to be taught again.

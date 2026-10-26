@@ -34,18 +34,24 @@ It records working habits, not project facts. What a project is and how it is bu
 
 12. **Separate what was verified from what was not.** Say which figures were checked today and against what, which are remembered, and which could not be checked at all.
 13. **Report failures as failures.** If a check failed, a step was skipped, or something could not be tested, say so with the evidence.
-14. **Prove a check can fail.** A test or gate that has never been seen to fail is not yet trusted. Where a test passes at once, break the code briefly to confirm the test notices, then restore it.
+14. **Validate meaningful outcomes.** Checks must distinguish correct behavior from relevant failure cases. Use negative cases where risk warrants them; a passing test does not require deliberately breaking implementation code or manufacturing a red run.
 15. **Admit the limits of a guide.** Instructions for a screen Claude cannot see are written from documentation. Say so, and name the steps most likely to differ.
 
 ## Building
 
-16. **Test first.** Write the test, watch it fail for the right reason, then make it pass.
+16. **Deliver with defined validation.** Define acceptance checks in the plan, then develop implementation and validation in the order appropriate to the task. TDD and a red/green sequence are not required. Reuse relevant tests; add checks for distinct requirements or regression risks. Behavior changes need appropriate automated coverage; visual and documentation changes may use recorded review. High-risk behavior needs explicit success, denial/failure and recovery checks. Required validation must pass before completion. Existing approved feature-specific gates remain binding unless amended by the owner.
 17. **Never weaken a check to get a pass.** No lowered thresholds, skipped tests, removed assertions, suppressed findings, or mocks standing in for a real dependency. Fix the cause. If the test itself is wrong, say so and let the owner decide.
 18. **Automated checks from the first commit.** Formatting, linting, type checking, security scanning, dependency auditing, secret scanning, and tests run in CI on every push and locally with one command.
 19. **Record every run from day one.** Each run of the checks saves its logs and machine-readable results, organised by date, run, stage, and test level, so trends can be tracked later.
 20. **Keep documents light.** Prefer fewer documents. Link to a source instead of restating it. When importing existing documents, keep them word for word and summarise beside them, so nothing is lost.
 21. **Touch only what the task needs.** No opportunistic refactoring.
 22. **Keep the status file current.** Refresh it whenever a document is created or approved, a task changes state, or a follow-up opens or closes.
+
+## Integration ownership and release batches
+
+Name one integration/closeout owner when agents share work. Stage only individually reviewed files or hunks and inspect the staged diff; never sweep another agent's work into a commit. Prepare a bounded execution/recovery batch before requesting external-action approval, and continue within that approval without repeated routine handoffs. A failed prerequisite stops dependent actions; do not repeatedly rerun an unchanged failure. Preserve separate push, deployment and access permissions.
+
+Use the existing feature closeout record for a short account of significant rework and resulting process corrections. Do not create a new reporting system.
 
 ## Git
 

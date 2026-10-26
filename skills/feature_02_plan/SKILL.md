@@ -7,6 +7,14 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
 
+## Integration and release readiness
+
+In the plan, identify material external assumptions: actual execution identity, permissions, provider behavior, input/output boundaries and recovery dependencies. Resolve design-blocking unknowns before implementation approval. Prove required operational prerequisites with bounded read-only checks under the actual identity before release; owner credentials are not equivalent. Unknown required prerequisites block release, not unrelated local work. Checks that require new access or external actions retain their approval requirements.
+
+For changed boundaries, plan representative producer-to-consumer validation using actual generated outputs, including relevant failure states. Isolated component tests do not prove the connection works. Reuse existing coverage and distinguish local, provider and live evidence. This does not require TDD.
+
+Name one integration/closeout owner. Prepare a bounded batch listing exact artifacts, destinations, authorization, order, recovery and stop conditions. Batch focused fixes before required release gates; reuse only qualifying evidence. Documentation-only changes do not justify an application release unless they affect the deployed artifact. Record implementation, local validation, live verification and owner acceptance separately; never label unproven prerequisites as release-ready.
+
 ## Steps
 
 1. Read the following for context:
@@ -17,10 +25,13 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 3. Generate `{project-root}/features/{feature-name}/02_feature_plan.md` using the template below. It always starts `Status: Draft` with no `> Approved:` line.
 
-4. Write the tests first:
+4. Define validation obligations before task breakdown. This is acceptance planning, not a mandatory test-first implementation sequence:
+   - Reuse existing coverage where sufficient; justify new tests by a distinct acceptance criterion or regression risk. Implementation and tests may be developed in either order, but required checks must pass before completion. No mandatory red/green evidence or test/code ratio.
+   - Visual and documentation obligations may use stable `RV-N` review IDs with explicit expected outcomes and recorded evidence; do not manufacture unit tests for prose or styling.
+   - For security, billing, data integrity and release controls, explicitly cover relevant denial, failure and recovery behavior without imposing TDD.
    - Give every test a stable ID: `UT-N` unit, `IT-N` integration, `E2E-N` end-to-end, `EC-N` edge case, `PT-N` performance. Do not renumber once tasks reference them.
    - Every test states the acceptance criteria it validates in **Covers**, using the `AC-N` identifiers from the spec. A test with no AC to validate may use `—`, as the exception.
-   - Every AC must be covered by at least one test.
+   - Every AC must be covered by at least one automated test or explicitly planned visual/document review.
    - Mark each of Unit, Integration, and End-to-End `Required`, `Optional`, or `Not Applicable`, with a one-line reason for anything not `Required`. Do not force coverage that doesn't fit the feature's shape.
    - Give the command that runs the tests in the application repository — locate it via `repo_path` in the project pointer and that repository's own tooling, or ask the user if none is documented yet.
 
@@ -33,9 +44,11 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 7. **Review gate:** if the user confirms the checklist is satisfied, update `Status: Draft` to `Status: Approved` in the document header, and add `> Approved: {today's date}` on the line beneath it, before ending your turn. Implementation should not begin against a Draft plan.
 
-8. **As implementation happens** (in the application repository, outside `sdd/`), whenever Claude completes work on one of these tasks, update that task's Status before ending the turn (`Not Started` → `In Progress` → `Complete`, or `Blocked` with a one-line reason in Notes). Never mark a task `Complete` without the tests it's responsible for actually existing and passing.
+8. **As implementation happens** (in the application repository, outside `sdd/`), whenever Claude completes work on one of these tasks, update that task's Status before ending the turn (`Not Started` → `In Progress` → `Complete`, or `Blocked` with a one-line reason in Notes). Never mark a task `Complete` until its required tests pass and any planned review has recorded evidence.
 
-9. **When every task's Status becomes Complete**, automatically invoke `system_consistency_review {project-name} {feature-name}` before telling the user the feature is done, and record the outcome in this document's `Verified` header field. All tasks Complete means **Implemented**, not **Verified**; verification requires a passing consistency review.
+9. At closeout, report delivered outcomes, validation results and limitations, and measured validation time where available. Note unnecessary overlap or supporting complexity for follow-up; do not infer effort from test counts.
+
+10. **When every task's Status becomes Complete**, automatically invoke `system_consistency_review {project-name} {feature-name}` before telling the user the feature is done, and record the outcome in this document's `Verified` header field. All tasks Complete means **Implemented**, not **Verified**; verification requires a passing consistency review.
 
 **Keep the status current:** whenever this skill creates its document, changes its Status, or the feature becomes Implemented or Verified, finish by running `project_90_status {project-name}` so `STATUS.md` matches before ending your turn.
 

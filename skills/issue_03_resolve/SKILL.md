@@ -16,7 +16,9 @@ The arguments passed to this skill are the project name in kebab-case, followed 
    - Run `git -C {repo_path} status` and note the current state. If there is unrelated uncommitted work, tell the user and confirm how to proceed rather than editing over it.
    - Only touch files required to implement the recommended corrective action — do not opportunistically refactor or "clean up" nearby code.
 
-3. Apply the recommended corrective action from the investigation:
+3. Define the verification needed for the investigated failure, then apply the recommended corrective action. Add or reuse regression coverage appropriate to the risk; implementation and tests may be developed in either order. A prior failing automated run is not mandatory. Preserve reproduction evidence and do not claim an unobserved red run.
+
+   Apply the recommended corrective action from the investigation:
    - If it requires a spec update, update the relevant document(s) under `{project-root}/features/{feature-name}/` (or `02_project_architecture.md` / `01_project_brief.md` for project-wide issues), in the order `01_feature_spec → 02_feature_plan`.
    - If it requires a code fix, implement it in the application repository.
    - If it requires both, do the spec update first, then the code fix, so the code is brought into line with an already-corrected spec.

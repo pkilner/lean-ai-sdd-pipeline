@@ -7,11 +7,17 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
 
+## Verify the failing boundary
+
+When a defect crosses components, verify the connected path with its real output shape and relevant execution identity, not only each component separately. Local or owner-credential success is not live/restricted-identity proof. State what was actually exercised and any remaining verification blocker. No mandatory test-first sequence is implied.
+
 ## Steps
 
 1. Read `{project-root}/issues/{issue-id}.md` (required — do not proceed if missing or if its Resolution section is still `_Not started._`).
 
 2. Execute the verification plan from the Resolution section: run the relevant tests (see the feature's `02_feature_plan.md` if applicable) and perform any other checks it describes.
+
+   Verify the reported failure and relevant regression risks, not just that code changed. Record actual outcomes; missing pre-fix red/green evidence alone is not a verification failure. Required checks and unresolved failures still block closure.
 
 3. Replace the `_Not started._` placeholder under `## 4. Verification` with the section template below.
 

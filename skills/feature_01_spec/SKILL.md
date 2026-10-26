@@ -7,6 +7,10 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
 
+## Bound supporting work
+
+State the smallest user-visible outcome and explicit exclusions. Prefer existing tools/components. If supporting work introduces a subsystem, name its necessity and simpler alternatives in Scope/Design for owner review; do not silently grow a feature into a platform. This is a concise part of the spec, not a separate report.
+
 ## Steps
 
 1. Read the following for context (required — do not proceed if `{project-root}/features/{feature-name}/` does not exist; tell the user to run `/feature_00_init` first):
@@ -21,7 +25,9 @@ The arguments passed to this skill are the project name in kebab-case, followed 
    - A genuinely new criterion gets the next unused number (highest existing AC number + 1), even if a lower number was previously retired.
    - A criterion that no longer applies is marked `Retired` in place, not deleted and not renumbered — references to it stay resolvable.
 
-4. Write the Design section to the size the feature needs, no larger:
+4. Keep acceptance criteria about observable outcomes, not test counts or a required implementation/test ordering. Identify visual or documentation acceptance explicitly when appropriate; implementation sequencing belongs to the plan and does not require TDD.
+
+   Write the Design section to the size the feature needs, no larger:
    - Use this project's real layer names from `02_project_architecture.md`, and cover only the layers the feature touches.
    - Do not restate project-level decisions; link to the architecture and describe only what this feature adds or changes.
    - Include the contract subsections (Data Model and Schema, API Endpoints, Validation Rules) only when the feature introduces or changes a contract. Otherwise write "No contract changes." under Contracts.

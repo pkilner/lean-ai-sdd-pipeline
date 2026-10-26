@@ -43,6 +43,8 @@ The arguments passed to this skill are the project name in kebab-case, optionall
    ### B3. Stale Test Inputs
    Test inputs in `02_feature_plan.md` that reference field names not in the spec's Contracts.
 
+   Treat explicitly planned visual/document review IDs (for example `RV-N`) as validation obligations alongside automated tests. Check their recorded evidence, not invented executable tests. Do not flag implementation-before-test ordering or absent red/green runs as defects unless an existing approved feature explicitly requires them. Required acceptance coverage and passing evidence remain mandatory.
+
    ### B4. Acceptance Criteria Coverage
    For every `AC-N` in `01_feature_spec.md` that is not `Retired`, confirm at least one test in `02_feature_plan.md` has a matching `Covers` reference, and that every test is satisfied by a task. Flag: ACs with no covering test, tests whose `Covers` names an AC that doesn't exist (stale reference), and tests with no task.
 
@@ -61,6 +63,10 @@ The arguments passed to this skill are the project name in kebab-case, optionall
    - Confirm `Status: Closed` issues have a filled-in Verification section with `Result: Pass`.
    - Confirm every artifact named in `Related` (features, acceptance criteria, ADRs) still exists.
    - Flag any issue stuck in a non-terminal status with no recent Status History activity — note it for the user's attention (do not guess why).
+
+### Readiness claims
+
+Check that implementation, local validation, live verification and owner acceptance are not conflated. Required unknown external prerequisites or unexercised component boundaries must remain explicit. Flag unsupported release-readiness claims rather than inferring success from isolated tests. Accepted deferrals are not passed criteria.
 
 ### D. Severity and Verdict
 

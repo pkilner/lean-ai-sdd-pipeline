@@ -155,7 +155,7 @@ These are the skills you run directly.
 | `project_adr` | as needed | `adr/adr_NNN_*.md` |
 | `project_setup_guide` | as needed | a numbered guide, in the project's guides folder, for something the owner must set up by hand: fixed sections, read-only Verify commands, and a record of the result |
 | `project_infrastructure_map` | after each guide | `infrastructure-map.md` in the guides folder — diagrams of what exists and what is planned, who can do what, and what is exposed |
-| `project_90_status` | anytime | health, current state, document/feature/issue/ADR summary, recommended next step — displayed, and saved as a snapshot to `sdd/STATUS.md` |
+| `project_90_status` | anytime | concise feature spec/plan document states and overall feature status, saved to `sdd/STATUS.md` |
 
 **Feature lifecycle** — run in order for each feature, each step gated on the previous being `Approved`:
 

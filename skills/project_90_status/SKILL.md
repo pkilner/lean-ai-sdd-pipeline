@@ -1,110 +1,36 @@
 ---
 name: project_90_status
-description: Report a project's status — health, current state, a table of every document with its location, Draft/Approved status, approval date, and next action, feature/issue/ADR summary, consistency result, and recommended next step — and save the same report as a snapshot to STATUS.md in the project root. Internally invokes system_workflow_resume, system_consistency_review, and system_next_step. Never modifies any other file.
+description: Update sdd/STATUS.md as a concise table of feature spec status, feature plan status and overall feature status. No journal or audit report. Never modifies other project files.
 ---
 
 The argument is the project name in kebab-case.
 
-**Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
+## Resolve and read
 
-## Steps
+Resolve `projects/<project>.yaml`; `{project-root}` is `<repo_path>/sdd`, not the pipeline checkout. Read the application instructions and the feature specs/plans themselves. STATUS.md is a derived snapshot, never evidence of approval or completion.
 
-1. Internally invoke `system_workflow_resume {project-name}` to get the project's current state: `01_project_brief.md` / `02_project_architecture.md` status, the list of features with their states (in definition / Feature Specified / Feature In Progress / Feature Implemented / Feature Verified), and the list of issues with their statuses.
+## Update the status table
 
-2. Internally invoke `system_consistency_review {project-name}` (project-wide — no feature name) to get a `PASS` / `PASS WITH WARNINGS` / `FAIL` verdict.
+1. Inventory feature directories in order. For each, read the spec and plan Status, explicit approval/readiness, task statuses, Verified field and recorded closeout decision.
+2. Write one row per feature with four columns only: Feature, Feature spec, Feature plan, Feature status. Link document status text to the actual document. Missing documents say Not created without a link.
+3. Preserve actual document states: Draft, Ready for review, Ready for approval, Approved, or an explicitly recorded closed state. Do not infer readiness or approval from file existence, completed prose or this status refresh.
+4. Derive feature state from evidence: Not started, In definition, Spec approved, Plan approved, In progress, Implemented (verification pending), or Closed — verified. Preserve Closed with accepted deferrals when explicitly accepted; never present deferred tasks or criteria as passed. If source states conflict, flag the row briefly and tell the user; do not silently rewrite the source.
+5. Replace the table with current values. Do not append entries or historical updates. Report the update briefly.
 
-3. Internally invoke `system_next_step {project-name}` to get the single recommended next command.
-
-4. Map the consistency verdict to a health indicator:
-   - `PASS` → 🟢 Healthy
-   - `PASS WITH WARNINGS` → 🟡 Attention Required
-   - `FAIL` → 🔴 Blocked
-
-5. Build the document inventory — one row for every document the workflow defines, whether or not it exists yet, so the reader can see where work stopped:
-   - **Project documents:** `01_project_brief.md` and `02_project_architecture.md`, each `Approved`, `Draft`, or `Not created`.
-   - **ADRs:** every file in `{project-root}/adr/`, each `Proposed` or `Accepted`.
-   - **Per feature** under `{project-root}/features/`: both documents in workflow order, each `Approved`, `Draft`, or `Not created`. For `02_feature_plan.md`, add the task counts and the `Verified` field. Include the feature's own ADRs, and the IDs of any open issues whose `Related` names the feature.
-   - **Issues:** every `ISSUE-xxxx.md` under `{project-root}/issues/`, with its `Status`, `Category`, and `Related`.
-   - **Planned features:** if `01_project_brief.md` lists planned features (for example a Delivery Sequence table) that have no directory yet, list each as `Not started`.
-
-6. Fill in the **Approved** column for every row:
-   - A document's approval date is its `> Approved:` header field. If the document is `Approved` but has no such field, show `not recorded` — never infer a date from file timestamps or git history.
-   - An ADR's date is the date of its `Accepted` row in Status History.
-   - Anything not yet approved or accepted shows `—`.
-
-7. Fill in the **Next action** column for every row, using the same ordering logic as `system_next_step`. Only the first unfinished step in each workflow gets a command; later steps wait on it:
-   - `Draft` → `Review and approve`
-   - `Proposed` ADR → `Review and accept`
-   - The first `Not created` document in a workflow → the command that creates it
-   - A later `Not created` document → `Waiting on step {N}`
-   - Approved feature plan with tasks remaining → `Implement — {N} tasks remaining`
-   - All tasks Complete but not Verified → `Consistency review`
-   - An issue → the command for its next workflow step; `Closed` → `—`
-   - Nothing needed → `—`
-
-8. Present the report directly in your response, in the format below.
-
-9. Write the same report to `{project-root}/STATUS.md`, replacing any previous snapshot. **Do not modify** `project.yaml`, any document, or any other project file.
-
----
-
-## Report Format
-
-Paths in the Location column are relative to `{project-root}` and written as Markdown links, so they open from `STATUS.md`. Omit a section's table when it has no rows and say "None yet." instead.
+## Output
 
 ```markdown
-# Project Status: {Project Name}
+# Feature Status
 
-> Generated: {date and time of this run}
-> Project: {project-name}
-
-This file is a snapshot written by `project_90_status`. It is only as current as its Generated time. Each document's own Status field and each feature plan's task table remain the source of truth.
-
-**Pick up here:** {command from system_next_step} — {one sentence of why}
-
-| | |
-|---|---|
-| Project Health | {🟢 Healthy / 🟡 Attention Required / 🔴 Blocked} |
-| Current State | {Project Initialized / Project Defined} |
-| Consistency Result | {PASS / PASS WITH WARNINGS / FAIL} |
-| Features | {N} total |
-| Issues | {N} total, {M} open |
-| ADRs | {N} Proposed, {N} Accepted |
-
-## Project Documents
-
-| Document | Location | Status | Approved | Next action |
-|---|---|---|---|---|
-| Project Brief | [01_project_brief.md](01_project_brief.md) | {Approved / Draft / Not created} | {date / —} | {action / —} |
-| Architecture | [02_project_architecture.md](02_project_architecture.md) | {Approved / Draft / Not created} | {date / —} | {action / —} |
-| ADR {NNN}: {title} | [adr/adr_{NNN}_{slug}.md](adr/adr_{NNN}_{slug}.md) | {Proposed / Accepted} | {date accepted / —} | {action / —} |
-
-## Features
-
-### {feature-name} — {state}
-
-| Step | Document | Location | Status | Approved | Next action |
-|---|---|---|---|---|---|
-| 1 | Feature Spec | [features/{feature-name}/01_feature_spec.md](features/{feature-name}/01_feature_spec.md) | {Approved / Draft / Not created} | {date / —} | {action / —} |
-| 2 | Feature Plan | features/{feature-name}/02_feature_plan.md | {Approved / Draft / Not created} — {X}/{Y} tasks Complete; Verified: {value} | {date / —} | {action / —} |
-
-Open issues: {issue-id, issue-id — or "none"}
-
-(Repeat per feature, in the order they were created. For a planned feature with no directory, give a heading `### {feature-name} — Not started` and one row whose Next action is the `/feature_00_init` command, or `Waiting on {earlier feature}` when it depends on one that is not finished.)
-
-## Issues
-
-| Issue | Location | Status | Category | Related | Next action |
-|---|---|---|---|---|---|
-| {issue-id}: {title} | [issues/{issue-id}.md](issues/{issue-id}.md) | {Open / Investigated / Resolved / Closed} | {category} | {features, acceptance criteria, ADRs} | {action / —} |
-
-## Consistency Findings
-
-{Each finding from the consistency review with its severity, or "None".}
+| Feature | Feature spec | Feature plan | Feature status |
+|---|---|---|---|
+| 01 · Example | [Approved](features/01-example/01_feature_spec.md) | [Draft](features/01-example/02_feature_plan.md) | Spec approved |
 ```
 
-## Notes
+## Boundaries
 
-- `STATUS.md` is a convenience copy for people. No skill reads it to determine state — `system_workflow_resume`, `system_consistency_review`, and `system_next_step` always read the documents themselves.
-- Only link a Location when the file exists; show the path as plain text when it is `Not created`.
-- Do not duplicate the state-determination logic already implemented in `system_workflow_resume`, `system_consistency_review`, or `system_next_step` — this skill only formats, presents, and saves what they report.
+STATUS.md contains only the title and current feature table. Do not include run logs, evidence narratives, issue/ADR inventories, infrastructure versions, health reports, next-step essays or chronological notes. Evidence belongs in the corresponding feature/issue records; infrastructure facts belong in the infrastructure map. Git retains prior snapshots.
+
+This skill only writes STATUS.md. A refresh does not require a new full-project audit. Required completion/issue-closure consistency reviews remain required by their own workflows; keep their evidence in the corresponding records, not STATUS.md. Use system_next_step or system_workflow_resume separately when orientation is requested or state is ambiguous, without pasting their reports into this file.
+
+Review the result: every existing feature has one row, links resolve, states match their sources, no history was appended, and no approval or verification was invented.

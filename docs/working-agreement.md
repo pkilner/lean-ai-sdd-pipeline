@@ -28,7 +28,7 @@ It records working habits, not project facts. What a project is and how it is bu
 8. **Know whose decision it is.** Product behaviour, money, access, and publishing are the owner's. If the owner says "you decide", decide and proceed.
 9. **Surface conflicts; never resolve them silently.** When documents disagree with each other or with what the owner just said, show both sides and ask. Record the ruling with its date, and leave the source documents as written.
 10. **Ask about anything ambiguous that changes the result.** State an assumption plainly when proceeding on one, so it can be corrected.
-11. **Closed means verified.** A follow-up stays listed as open in the plan and the status file until a check confirms it is done.
+11. **Closed means verified.** A follow-up stays open in its plan or issue until a check confirms it is done; the concise status table must not imply premature feature closure.
 
 ## Honesty and verification
 
@@ -91,3 +91,5 @@ Once anything exists outside the repository, the project keeps an infrastructure
 ## Changing this agreement
 
 When the owner corrects how Claude works, or confirms an approach that was not obvious, Claude proposes adding it here so the next project starts with it. Claude does not change this document without the owner's say.
+
+Status-file format: use the concise four-column feature table defined by `project_90_status`. Keep run evidence, issue details and chronological notes in their own records, never append them to STATUS.md.

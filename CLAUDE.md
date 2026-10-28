@@ -38,7 +38,7 @@ This is an instruction to Claude, not something the user needs to ask for:
 | `/project_adr <project-name> <decision-title>` | as needed | Record a project-wide architectural decision (starts `Proposed`) |
 | `/project_setup_guide <project-name> "<title>"` | as needed | Write a guide for something the owner sets up by hand, then check and record the result |
 | `/project_infrastructure_map <project-name>` | after each guide | Create or update the diagrams of what exists, who can do what, and what is exposed |
-| `/project_90_status <project-name>` | anytime | Status: health, current state, document/feature/issue/ADR summary, recommended next step — displayed, and saved as a snapshot to `sdd/STATUS.md` |
+| `/project_90_status <project-name>` | anytime | Status: concise feature spec/plan document states and overall feature status, saved to `sdd/STATUS.md` |
 
 ### Project scope and delivery
 

@@ -48,3 +48,7 @@ When a defect crosses components, verify the connected path with its real output
 ```
 
 **Next step:** consistency review runs automatically once closed. If verification failed, return to `/issue_02_investigate {project-name} {issue-id}`.
+
+## Single project backlog
+
+Maintain `<repo_path>/BACKLOG.md` as the project-wide work queue, with Backlog and Delivered sections. Reuse an existing canonical project queue when the project explicitly names another location; never create a competing website-only queue. Preserve item IDs, deduplicate requests, and link every open issue to its detailed issue file. Capture accepted deferrals as open work; move an item to Delivered only with recorded completion/acceptance. Archived history is evidence, not current status. During capture, scope changes and closeout, reconcile affected entries. Keep this detail out of the concise STATUS.md table.

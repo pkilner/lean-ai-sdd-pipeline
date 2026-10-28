@@ -93,3 +93,7 @@ Once anything exists outside the repository, the project keeps an infrastructure
 When the owner corrects how Claude works, or confirms an approach that was not obvious, Claude proposes adding it here so the next project starts with it. Claude does not change this document without the owner's say.
 
 Status-file format: use the concise four-column feature table defined by `project_90_status`. Keep run evidence, issue details and chronological notes in their own records, never append them to STATUS.md.
+
+## Single project backlog
+
+Maintain `<repo_path>/BACKLOG.md` as the project-wide work queue, with Backlog and Delivered sections. Reuse an existing canonical project queue when the project explicitly names another location; never create a competing website-only queue. Preserve item IDs, deduplicate requests, and link every open issue to its detailed issue file. Capture accepted deferrals as open work; move an item to Delivered only with recorded completion/acceptance. Archived history is evidence, not current status. During capture, scope changes and closeout, reconcile affected entries. Keep this detail out of the concise STATUS.md table.

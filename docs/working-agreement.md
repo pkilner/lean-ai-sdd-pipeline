@@ -97,3 +97,20 @@ Status-file format: use the concise four-column feature table defined by `projec
 ## Single project backlog
 
 Maintain `<repo_path>/BACKLOG.md` as the project-wide work queue, with Backlog and Delivered sections. Reuse an existing canonical project queue when the project explicitly names another location; never create a competing website-only queue. Preserve item IDs, deduplicate requests, and link every open issue to its detailed issue file. Capture accepted deferrals as open work; move an item to Delivered only with recorded completion/acceptance. Archived history is evidence, not current status. During capture, scope changes and closeout, reconcile affected entries. Keep this detail out of the concise STATUS.md table.
+
+## Lean delivery — owner direction, 2026-11-04 (WEB-B60)
+
+For each increment, state the user benefit, smallest useful deliverable and explicit
+exclusions. Separate product work from supporting work. Reuse existing components,
+checks and evidence before proposing another tool or subsystem; explain why a
+simpler alternative is insufficient. A new provider, subsystem, material contract
+change or additional operating cost returns for scope review rather than growing
+silently. At closeout, record significant rework, validation duration/cost when
+known and avoidable supporting complexity once in the existing feature record.
+Unknown effort stays unknown; test counts are not an effort estimate. No fixed
+test/code ratio, new governance service or weakened safety gates.
+
+Continue authorized workflow steps without routine confirmation: spec approval
+leads to drafting the plan. Honor project-specific approval and execution policies,
+including batch implementation/validation, and preserve separate external-action
+permissions. A draft is never approved merely because it exists.

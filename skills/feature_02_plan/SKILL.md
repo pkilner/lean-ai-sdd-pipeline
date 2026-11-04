@@ -7,6 +7,15 @@ The arguments passed to this skill are the project name in kebab-case, followed 
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
 
+## Keep supporting work proportional
+
+Name the user benefit, smallest deliverable and exclusions. Separate product and
+supporting tasks; reuse existing tools/tests before adding new ones. Escalate new
+subsystems, providers, material contracts or costs for scope review. Keep cost and
+complexity notes in the existing closeout record, with unknowns explicit. Honor
+an owner's batch implementation/testing policy; do not turn task dependencies
+into compulsory per-task suite execution or invent test/code ratios.
+
 ## Integration and release readiness
 
 In the plan, identify material external assumptions: actual execution identity, permissions, provider behavior, input/output boundaries and recovery dependencies. Resolve design-blocking unknowns before implementation approval. Prove required operational prerequisites with bounded read-only checks under the actual identity before release; owner credentials are not equivalent. Unknown required prerequisites block release, not unrelated local work. Checks that require new access or external actions retain their approval requirements.

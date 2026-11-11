@@ -12,6 +12,9 @@ The arguments passed to this skill are the project name in kebab-case, optionall
 
 ## Steps
 
+Before applying task-derived state rules, check for an explicit owner-approved closeout decision in the source documents. Report **Closed with accepted deferrals** when recorded, and point to its outstanding backlog obligations. Do not reopen that feature from historical progress notes or classify it as Verified because a `Verified:` field contains qualified prose. Verified requires an explicit passing result with evidence. Apply project-specific status rules before generic templates.
+
+
 1. If only a project name is given:
    - If the pointer `projects/{project-name}.yaml` does not exist → recommend `/project_00_init {project-name} {repo-path}` (this also registers a project whose `sdd/` already exists in its application repository).
    - Else if `01_project_brief.md` is missing → recommend `/project_01_brief {project-name}`.

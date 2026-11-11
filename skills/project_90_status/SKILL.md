@@ -3,6 +3,13 @@ name: project_90_status
 description: Update sdd/STATUS.md as a concise table of feature spec status, feature plan status and overall feature status. No journal or audit report. Never modifies other project files.
 ---
 
+## Documentation style
+
+Before writing or updating documentation, apply `asd-ste100` through the
+[shared SDD documentation rule](../../docs/working-agreement.md#sdd-documentation-style--owner-direction-2026-11-08).
+Read the installed skill once per session, as that rule directs. Preserve this
+workflow's templates, requirements, approvals and evidence.
+
 The argument is the project name in kebab-case.
 
 ## Resolve and read

@@ -3,6 +3,13 @@ name: project_01_brief
 description: Generate a Project Brief — the second step in the project workflow. Defines what the project is, who it is for, and what success looks like, at the whole-project level (not a single feature).
 ---
 
+## Documentation style
+
+Before writing or updating documentation, apply `asd-ste100` through the
+[shared SDD documentation rule](../../docs/working-agreement.md#sdd-documentation-style--owner-direction-2026-11-08).
+Read the installed skill once per session, as that rule directs. Preserve this
+workflow's templates, requirements, approvals and evidence.
+
 The argument passed to this skill is the project name in kebab-case.
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.

@@ -21,6 +21,25 @@ It records working habits, not project facts. What a project is and how it is bu
 4. **Keep the owner oriented.** End a turn with where things stand and the single next step.
 5. **On return after a break, give a briefing.** Re-read the real state of the documents, the repositories, and anything else that could have changed. Do not answer "where did we leave off" from memory.
 
+## SDD documentation style — owner direction, 2026-11-08
+
+Use the `asd-ste100` skill whenever creating or updating SDD documentation.
+This includes briefs, architecture, specs, plans, ADRs, issues, status, setup guides and supporting technical documentation.
+Read its `SKILL.md` once per session before writing. Reuse that context for later edits.
+The shared local installation is `~/.codex/skills/asd-ste100/SKILL.md` (version 0.4.0 at adoption).
+Codex and Claude use the same source. Do not copy its rules into each SDD skill.
+Source: https://github.com/danyuchn/asd-ste100-skill.
+
+- Use Strict mode for requirements, acceptance criteria, task instructions and procedures. Use STE-flavored mode for explanatory prose.
+- Preserve technical meaning, conditions, exceptions, uncertainty and the distinctions between must, should and may.
+- Preserve stable IDs, links, approvals, evidence, code, commands and required document structure.
+- Keep facts and evidence in their canonical record. Link instead of repeating them. Update current summaries instead of appending repetitive journals.
+- Apply the style to the requested changes. Do not rewrite approved documents or marketing copy without a separate request.
+- Review changed prose for clarity and meaning. The optional linter is not a new CI, release or approval gate.
+
+If the installation is unavailable, report that limitation and continue with the existing plain-language rules. Do not claim skill compliance.
+These are authoring instructions, not an automatic enforcement service. Existing SDD workflows and owner decisions remain authoritative.
+
 ## Decisions and approvals
 
 6. **One stage at a time.** Do not run ahead of an unapproved document. Present the review checklist and wait.
@@ -28,7 +47,7 @@ It records working habits, not project facts. What a project is and how it is bu
 8. **Know whose decision it is.** Product behaviour, money, access, and publishing are the owner's. If the owner says "you decide", decide and proceed.
 9. **Surface conflicts; never resolve them silently.** When documents disagree with each other or with what the owner just said, show both sides and ask. Record the ruling with its date, and leave the source documents as written.
 10. **Ask about anything ambiguous that changes the result.** State an assumption plainly when proceeding on one, so it can be corrected.
-11. **Closed means verified.** A follow-up stays open in its plan or issue until a check confirms it is done; the concise status table must not imply premature feature closure.
+11. **Record closure accurately.** Verified closure requires sufficient evidence. An explicit owner decision may instead close a feature with accepted deferrals: retain that exact state, link outstanding obligations to the canonical backlog, and do not mark deferred checks passed. A follow-up remains open until verified or explicitly dispositioned. Historical progress notes do not override a later recorded closeout decision.
 
 ## Honesty and verification
 
@@ -114,3 +133,25 @@ Continue authorized workflow steps without routine confirmation: spec approval
 leads to drafting the plan. Honor project-specific approval and execution policies,
 including batch implementation/validation, and preserve separate external-action
 permissions. A draft is never approved merely because it exists.
+
+
+## Full CI permission and efficient validation — owner direction, 2026-11-08
+
+Obtain the owner's explicit permission before each full CI run or rerun. This
+includes candidate workflows and pushes or other actions that automatically
+trigger full CI. General delivery, unattended work, push or deployment permission
+does not authorize a full CI run. Before requesting permission, state the source
+revision, changes since the last run, checks required and why existing evidence
+is insufficient. If workflow scope is uncertain, inspect it before triggering it.
+
+Batch related fixes. Before pushing, use the formatter and inexpensive checks
+specified by the repository configuration and CI; do not substitute a different
+formatter. Review the final diff. A formatting-only correction does not by itself
+justify repeating local functional tests.
+
+Before dispatching validation, inspect existing runs for the same source and
+configuration. Reuse evidence only when the release policy permits it. Do not
+launch duplicate runs. Targeted checks and read-only monitoring remain permitted
+within existing authorization. A required full CI gate still requires permission;
+keep release pending rather than bypassing the gate. Do not change CI triggers or
+add skip directives to avoid this permission rule.

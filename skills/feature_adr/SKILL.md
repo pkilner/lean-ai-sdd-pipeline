@@ -3,6 +3,13 @@ name: feature_adr
 description: Create a feature-level Architecture Decision Record (ADR). Can be triggered at any point in the feature workflow to capture a significant decision, the options considered, and the rationale. Pass the project name, feature name, and a short decision title as arguments.
 ---
 
+## Documentation style
+
+Before writing or updating documentation, apply `asd-ste100` through the
+[shared SDD documentation rule](../../docs/working-agreement.md#sdd-documentation-style--owner-direction-2026-11-08).
+Read the installed skill once per session, as that rule directs. Preserve this
+workflow's templates, requirements, approvals and evidence.
+
 The arguments passed to this skill are the project name in kebab-case, the feature name in kebab-case, and a short decision title (e.g. `my-app user-onboarding sync-conflict-strategy`).
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.

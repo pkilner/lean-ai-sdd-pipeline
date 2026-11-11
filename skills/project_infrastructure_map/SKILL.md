@@ -3,6 +3,13 @@ name: project_infrastructure_map
 description: Create or update the project's infrastructure map — a document of diagrams showing what exists and what is only planned, the boundaries between components, who can do what, what is reachable from outside, and where the build is heading. Run after each setup guide is completed. Pass the project name.
 ---
 
+## Documentation style
+
+Before writing or updating documentation, apply `asd-ste100` through the
+[shared SDD documentation rule](../../docs/working-agreement.md#sdd-documentation-style--owner-direction-2026-11-08).
+Read the installed skill once per session, as that rule directs. Preserve this
+workflow's templates, requirements, approvals and evidence.
+
 The argument passed to this skill is the project name in kebab-case.
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.

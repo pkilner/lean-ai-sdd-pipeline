@@ -3,6 +3,13 @@ name: project_setup_guide
 description: Write a setup guide for something the owner must configure by hand, such as a cloud resource, an account setting, or a repository setting. Produces a numbered guide with fixed sections, adds it to the guides index, and, once the owner has carried it out, checks and records the result. Pass the project name and a short guide title.
 ---
 
+## Documentation style
+
+Before writing or updating documentation, apply `asd-ste100` through the
+[shared SDD documentation rule](../../docs/working-agreement.md#sdd-documentation-style--owner-direction-2026-11-08).
+Read the installed skill once per session, as that rule directs. Preserve this
+workflow's templates, requirements, approvals and evidence.
+
 The arguments passed to this skill are the project name in kebab-case, followed by a short title for the guide (e.g. `my-app "Cloud SQL"`).
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.

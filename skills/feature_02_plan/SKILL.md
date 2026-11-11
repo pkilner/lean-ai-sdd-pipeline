@@ -3,6 +3,13 @@ name: feature_02_plan
 description: Generate a Feature Plan — the third step in the feature workflow. One document listing the tests (each mapped to the AC-N it validates) and the coding tasks that satisfy them, with a Status column for tracking real progress. Tests define "done"; the tasks exist to satisfy them.
 ---
 
+## Documentation style
+
+Before writing or updating documentation, apply `asd-ste100` through the
+[shared SDD documentation rule](../../docs/working-agreement.md#sdd-documentation-style--owner-direction-2026-11-08).
+Read the installed skill once per session, as that rule directs. Preserve this
+workflow's templates, requirements, approvals and evidence.
+
 The arguments passed to this skill are the project name in kebab-case, followed by the feature name in kebab-case.
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.
@@ -15,6 +22,13 @@ subsystems, providers, material contracts or costs for scope review. Keep cost a
 complexity notes in the existing closeout record, with unknowns explicit. Honor
 an owner's batch implementation/testing policy; do not turn task dependencies
 into compulsory per-task suite execution or invent test/code ratios.
+
+## CI permission and pre-push checks
+
+Follow the [shared full CI permission and efficient validation rule](../../docs/working-agreement.md#full-ci-permission-and-efficient-validation--owner-direction-2026-11-08).
+Require explicit owner permission for each full CI run, including automatic runs
+triggered by pushes. Plan targeted checks, repository-required formatting and
+batched corrections before requesting a full run. Preserve required release gates.
 
 ## Integration and release readiness
 
@@ -32,9 +46,14 @@ Name one integration/closeout owner. Prepare a bounded batch listing exact artif
 
 2. **Review gate:** check `01_feature_spec.md`'s Status. If `Draft`, stop here and tell the user it needs review and approval first. If the user confirms approval in response, update its Status to `Approved`, add `> Approved: {today's date}` on the line beneath it, then continue.
 
-3. Generate `{project-root}/features/{feature-name}/02_feature_plan.md` using the template below. It always starts `Status: Draft` with no `> Approved:` line.
+3. Generate `{project-root}/features/{feature-name}/02_feature_plan.md` using the template below. It always starts `Status: Draft` with no `> Approved:` line. Present delivery tasks first, validation second, and release/acceptance last. Define task-to-test mappings during planning, but do not prescribe test-driven development. Honor the owner's batching policy: implement related changes, run appropriate validation, then release after required gates pass.
 
-4. Define validation obligations before task breakdown. This is acceptance planning, not a mandatory test-first implementation sequence:
+4. Write the delivery tasks first:
+   - Break the work down to individual coding tasks, not milestones. Each starts `Not Started`.
+   - Every task lists the test IDs it makes possible to write and pass in **Tests Satisfied**. Every test must be satisfied by at least one task; record that task number in the test's **Task** column. A test with no task, or an AC with no test, is a gap to resolve before proceeding.
+   - Add a documentation task wherever a public interface, non-obvious behaviour, configuration, or setup needs explaining, naming what specifically to document.
+
+5. Define validation obligations after the task breakdown. Specify how the completed implementation will be checked; this does not require writing or running tests before implementation:
    - Reuse existing coverage where sufficient; justify new tests by a distinct acceptance criterion or regression risk. Implementation and tests may be developed in either order, but required checks must pass before completion. No mandatory red/green evidence or test/code ratio.
    - Visual and documentation obligations may use stable `RV-N` review IDs with explicit expected outcomes and recorded evidence; do not manufacture unit tests for prose or styling.
    - For security, billing, data integrity and release controls, explicitly cover relevant denial, failure and recovery behavior without imposing TDD.
@@ -43,11 +62,6 @@ Name one integration/closeout owner. Prepare a bounded batch listing exact artif
    - Every AC must be covered by at least one automated test or explicitly planned visual/document review.
    - Mark each of Unit, Integration, and End-to-End `Required`, `Optional`, or `Not Applicable`, with a one-line reason for anything not `Required`. Do not force coverage that doesn't fit the feature's shape.
    - Give the command that runs the tests in the application repository — locate it via `repo_path` in the project pointer and that repository's own tooling, or ask the user if none is documented yet.
-
-5. Then write the tasks:
-   - Break the work down to individual coding tasks, not milestones. Each starts `Not Started`.
-   - Every task lists the test IDs it makes possible to write and pass in **Tests Satisfied**. Every test must be satisfied by at least one task; record that task number in the test's **Task** column. A test with no task, or an AC with no test, is a gap to resolve before proceeding.
-   - Add a documentation task wherever a public interface, non-obvious behaviour, configuration, or setup needs explaining, naming what specifically to document.
 
 6. After writing the file, present the Review Checklist to the user.
 
@@ -75,7 +89,20 @@ Name one integration/closeout owner. Prepare a bounded batch listing exact artif
 > Depends on: 01_feature_spec.md
 > Verified: Not yet
 
-## Test Approach
+## Delivery Tasks
+
+Layer key — one letter per layer this feature touches, from `02_project_architecture.md`.
+
+Tasks are numbered in build order. Dependencies identify required inputs. Follow the project's batch policy: implemented dependencies may support local downstream work while validation is pending when the owner permits it. Keep unverified tasks In Progress; release requires passed checks.
+
+| # | Task | Layer | Depends On | Tests Satisfied | Status | Notes |
+|---|---|---|---|---|---|---|
+| 1 | | | — | UT-1 | Not Started | |
+| 2 | | | 1 | EC-1 | Not Started | |
+
+Add detail beneath the table for any task that needs more explanation than fits in a row, referencing the relevant part of the spec.
+
+## Validation Approach
 
 | Level | Required / Optional / Not Applicable | Reason (if not Required) |
 |---|---|---|
@@ -87,7 +114,7 @@ Name one integration/closeout owner. Prepare a bounded batch listing exact artif
 
 **Test data:** any data that must exist or be generated.
 
-## Tests
+## Validation Checks
 
 | ID | Level | Test | Expected Result | Covers | Task |
 |---|---|---|---|---|---|
@@ -97,18 +124,9 @@ Name one integration/closeout owner. Prepare a bounded batch listing exact artif
 
 Add detail beneath the table for any test that needs setup or steps explained.
 
-## Tasks
+## Release and Acceptance
 
-Layer key — one letter per layer this feature touches, from `02_project_architecture.md`.
-
-Tasks are numbered in build order. A task cannot begin until the tasks it depends on are complete.
-
-| # | Task | Layer | Depends On | Tests Satisfied | Status | Notes |
-|---|---|---|---|---|---|---|
-| 1 | | | — | UT-1 | Not Started | |
-| 2 | | | 1 | EC-1 | Not Started | |
-
-Add detail beneath the table for any task that needs more explanation than fits in a row, referencing the relevant part of the spec.
+State the release order, required gates, deployed/manual acceptance and recovery/stop conditions. Reuse the project release procedure. Distinguish local validation, provider checks, deployment and owner acceptance. If no deployment is needed, state that explicitly.
 
 ## Open Questions
 
@@ -120,6 +138,7 @@ List any unresolved questions. Leave blank if none.
 
 Before starting implementation, confirm:
 
+- [ ] Delivery tasks appear before validation, followed by release/acceptance; execution follows the owner's batching policy
 - [ ] Each of Unit / Integration / End-to-End is marked Required, Optional, or Not Applicable, with a reason for anything not Required
 - [ ] Every acceptance criterion in the spec is covered by at least one test
 - [ ] Every test has a stable ID, a Covers reference, and a task that satisfies it

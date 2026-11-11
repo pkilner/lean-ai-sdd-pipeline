@@ -3,6 +3,13 @@ name: issue_03_resolve
 description: Resolve an investigated issue — the third user step in the issue workflow. Applies the recommended corrective action (spec update, code fix, or both) and records what changed in the Resolution section of the issue's file. Pass the project name and issue ID.
 ---
 
+## Documentation style
+
+Before writing or updating documentation, apply `asd-ste100` through the
+[shared SDD documentation rule](../../docs/working-agreement.md#sdd-documentation-style--owner-direction-2026-11-08).
+Read the installed skill once per session, as that rule directs. Preserve this
+workflow's templates, requirements, approvals and evidence.
+
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID.
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.

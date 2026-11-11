@@ -3,6 +3,13 @@ name: issue_01_capture
 description: Capture a new issue — the first step in the issue workflow. Creates sdd/issues/ISSUE-xxxx.md in the project's application repository describing what was observed, then automatically classifies it. One file holds the issue's whole lifecycle. Issues are siblings of features, not nested beneath them.
 ---
 
+## Documentation style
+
+Before writing or updating documentation, apply `asd-ste100` through the
+[shared SDD documentation rule](../../docs/working-agreement.md#sdd-documentation-style--owner-direction-2026-11-08).
+Read the installed skill once per session, as that rule directs. Preserve this
+workflow's templates, requirements, approvals and evidence.
+
 The arguments passed to this skill are the project name in kebab-case, followed by a short free-text description of what was observed (e.g. `my-app "sync fails silently when offline for more than 24h"`).
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.

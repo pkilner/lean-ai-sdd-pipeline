@@ -3,6 +3,13 @@ name: project_02_architecture
 description: Generate the project Architecture document — the third step in the project workflow. Defines the project's system layers (with repository path, responsibility, and status), key technical decisions, and data stores. Every feature_* and system_* skill reads this to know the project's real layer names and where their code lives.
 ---
 
+## Documentation style
+
+Before writing or updating documentation, apply `asd-ste100` through the
+[shared SDD documentation rule](../../docs/working-agreement.md#sdd-documentation-style--owner-direction-2026-11-08).
+Read the installed skill once per session, as that rule directs. Preserve this
+workflow's templates, requirements, approvals and evidence.
+
 The argument passed to this skill is the project name in kebab-case.
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.

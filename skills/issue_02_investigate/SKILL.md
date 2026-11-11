@@ -3,6 +3,13 @@ name: issue_02_investigate
 description: Investigate a classified issue — the second user step in the issue workflow. Determines root cause and classifies the code/documentation mismatch using the Reconciliation model, recorded in the Investigation section of the issue's file. Pass the project name and issue ID.
 ---
 
+## Documentation style
+
+Before writing or updating documentation, apply `asd-ste100` through the
+[shared SDD documentation rule](../../docs/working-agreement.md#sdd-documentation-style--owner-direction-2026-11-08).
+Read the installed skill once per session, as that rule directs. Preserve this
+workflow's templates, requirements, approvals and evidence.
+
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID (e.g. `my-app ISSUE-0008`).
 
 **Path resolution:** `{project-root}` is the `sdd/` directory inside this project's application repository. Read the pointer `projects/{project-name}.yaml` in this pipeline repo for `repo_path`; `{project-root}` is `{repo_path}/sdd`. If the pointer does not exist, stop and tell the user to run `/project_00_init` first.

@@ -4,6 +4,13 @@ description: (Internal — not for direct user invocation.) Classify a captured 
 user-invocable: false
 ---
 
+## Documentation style
+
+Before writing or updating documentation, apply `asd-ste100` through the
+[shared SDD documentation rule](../../docs/working-agreement.md#sdd-documentation-style--owner-direction-2026-11-08).
+Read the installed skill once per session, as that rule directs. Preserve this
+workflow's templates, requirements, approvals and evidence.
+
 **This is a system skill.** It is never invoked directly by a user typing a command — it is invoked automatically by `issue_01_capture`, or by Claude when an issue needs reclassifying (e.g. its description changed materially). Do not present this as something the user should run themselves.
 
 The arguments passed to this skill are the project name in kebab-case, followed by the issue ID.

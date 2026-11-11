@@ -12,6 +12,9 @@ The argument is the project name in kebab-case. If omitted, list every project r
 
 ## Steps
 
+Before applying task-derived state rules, check for an explicit owner-approved closeout decision in the source documents. Report **Closed with accepted deferrals** when recorded, and point to its outstanding backlog obligations. Do not reopen that feature from historical progress notes or classify it as Verified because a `Verified:` field contains qualified prose. Verified requires an explicit passing result with evidence. Apply project-specific status rules before generic templates.
+
+
 1. Read `{project-root}/project.yaml`, `01_project_brief.md`, and `02_project_architecture.md` (skip any that don't exist yet — report their absence instead of failing). Determine project state:
    - **Project Initialized** — `project.yaml` exists; `01_project_brief.md` and/or `02_project_architecture.md` missing or still `Draft`.
    - **Project Defined** — both `01_project_brief.md` and `02_project_architecture.md` exist with `Status: Approved`.
